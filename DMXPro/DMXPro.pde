@@ -1,20 +1,21 @@
 import dmxP512.*;
+
 ArrayList<ThreeCh> Lights3Ch;
 int numLights = 5;
 
 //set the number of pre-created effects here and create a switch for each effect
 int numEffects = 3;
-boolean modes[] = new boolean[numEffects];
+ArrayList<Boolean> modes = new ArrayList<Boolean>(numEffects);
 
 //variable for total number of effects
 int totalChannels;
 ArrayList<PGraphics> Layers;
 
 //start the DMX libaray this is build on top of with necessary variables
-DmxP512 dmxOutput;
-int universeSize = 256;
-String DMXPRO_PORT = "COM4";
-int DMXPRO_BAUDRATE = 115000;
+//DmxP512 dmxOutput;
+//int universeSize = 256;
+//String DMXPRO_PORT = "COM4";
+//int DMXPRO_BAUDRATE = 115000;
 
 //Initialize the array for Boucing Balls effect with variables for 
 ArrayList<Ball> balls;
@@ -29,12 +30,13 @@ int pCount = 10;
 
 
 void setup(){
-  size(500,500);
-  colorMode(RGB);
+  size(500,500,P2D);
+  //colorMode(RGB);
   
   //DMX setup procedure
-  dmxOutput = new DmxP512(this, universeSize, false);
-  dmxOutput.setupDmxPro(DMXPRO_PORT, DMXPRO_BAUDRATE);
+  //dmxOutput = new DmxP512(this, universeSize, false);
+  //dmxOutput.setupDmxPro(DMXPRO_PORT, DMXPRO_BAUDRATE);
+  
   
   //create an arraylist of PGraphics for all the layers for the preset effects
   Layers = new ArrayList<PGraphics>();
@@ -62,16 +64,20 @@ void setup(){
   //start the program with the first effect on
   for(int i = 0; i < numEffects; i++){
     if(i == 0){
-   modes[i] = true; 
+      Boolean m = modes.get(i);
+      m = true;
+      modes.set(i, m);
     }else{
-     modes[i] = false; 
+     Boolean m = modes.get(i);
+      m = true;
+      modes.set(i, m);
     }
   }
 }
 
 void draw(){
   //Mouse Controlled HSB
-  if(modes[0] == true){
+  if(modes.get(0) == true){
   PGraphics g = Layers.get(0);
   g.beginDraw();
   g.colorMode(HSB);
@@ -82,7 +88,7 @@ void draw(){
   }
   
   //Bouncing Balls
-  else if(modes[1] == true){
+  else if(modes.get(1) == true){
     PGraphics g = Layers.get(1);
     g.beginDraw();
     g.background(0);
@@ -96,7 +102,7 @@ void draw(){
   }
   
   //Particle Shower
-  else if(modes[2] == true){
+  else if(modes.get(2) == true){
     PGraphics g = Layers.get(2);
     g.beginDraw();
     g.background(0);
@@ -105,17 +111,17 @@ void draw(){
   }
   
   //this function runs through all the switches and applies the layer to the light color calculator
-  for(int j = 0; j < modes.length; j++){
-    if(modes[j] == true){
+  for(int j = 0; j < modes.size(); j++){
+    if(modes.get(j) == true){
       PGraphics g = Layers.get(j);
       
       //iterates through all the lights and applies color to all the 3 channel lights
   for(int i = 0; i < Lights3Ch.size(); i+=3){
     ThreeCh l = Lights3Ch.get(i);
     color c = l.sampleColor(g);
-    dmxOutput.set(i, int(red(c)));
-    dmxOutput.set(i+1, int(green(c)));
-    dmxOutput.set(i+2, int(blue(c)));
+    //dmxOutput.set(i, int(red(c)));
+    //dmxOutput.set(i+1, int(green(c)));
+    //dmxOutput.set(i+2, int(blue(c)));
     noStroke();
     fill(c);
     l.display();
@@ -130,8 +136,7 @@ void lightArranger(ArrayList<ThreeCh> lights){
     ThreeCh l = lights.get(i);
     if(mouseX > l.location.x && mouseX < l.location.x + l.sz && mouseY > l.location.y && mouseY < l.location.y + l.sz){
      if(mousePressed == true){
-      l.location.x = mouseX;
-      l.location.y = mouseY;
+      l.move(mouseX, mouseY);
      }
     }
   }
@@ -140,29 +145,41 @@ void lightArranger(ArrayList<ThreeCh> lights){
 //currently usingthe keys on the keyboard to switch between effects
 void keyPressed(){
  if(key == '1'){
-   for(int i = 0; i < modes.length; i++){
+   for(int i = 0; i < modes.size(); i++){
    if(i == 0){
-    modes[i] = true; 
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
    }else{
-    modes[i] = false;
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
    }
   }
  }
  if(key == '2'){
-   for(int i = 0; i < modes.length; i++){
+   for(int i = 0; i < modes.size(); i++){
    if(i == 1){
-    modes[i] = true; 
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
    }else{
-    modes[i] = false;
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
    }
   }
  }
  if(key == '3'){
-   for(int i = 0; i < modes.length; i++){
+   for(int i = 0; i < modes.size(); i++){
    if(i == 2){
-    modes[i] = true; 
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
    }else{
-    modes[i] = false;
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
    }
   }
  }

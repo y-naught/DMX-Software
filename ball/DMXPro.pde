@@ -16,6 +16,10 @@ Ball[] balls;
 int numBalls = 10;
 float ballSize = 20;
 
+Shower shower;
+float pSize = 20;
+int pCount = 10;
+
 void setup(){
   size(500,500);
   colorMode(RGB);
@@ -35,6 +39,8 @@ void setup(){
   for(int i = 0; i < 5; i++){
     Lights3Ch.add(new ThreeCh(i*3, new PVector(i * width / 20, height / 2)));
   }
+  
+  shower = new Shower(pCount, pSize);
   
   //start the program with the first effect on
   for(int i = 0; i < numEffects; i++){
@@ -76,13 +82,16 @@ void draw(){
     PGraphics g = Layers.get(2);
     g.beginDraw();
     g.background(0);
-    //make something here
+    shower.run(g);
     g.endDraw();
   }
   
+  for(int j = 0; j < modes.length; j++){
+    if(modes[j] == true){
+      PGraphics g = Layers.get(j);
   for(int i = 0; i < Lights3Ch.size(); i+=3){
     ThreeCh l = Lights3Ch.get(i);
-    color c = l.sampleColor(sampleImage);
+    color c = l.sampleColor(g);
     dmxOutput.set(i, int(red(c)));
     dmxOutput.set(i+1, int(green(c)));
     dmxOutput.set(i+2, int(blue(c)));
@@ -90,6 +99,20 @@ void draw(){
     fill(c);
     l.display();
  }
+    }
+  }
+}
+
+void lightArranger(ArrayList<ThreeCh> lights){
+  for(int i = 0; i < lights.size(); i++){
+    ThreeCh l = lights.get(i);
+    if(mouseX > l.location.x && mouseX < l.location.x + l.sz && mouseY > l.location.y && mouseY < l.location.y + l.sz){
+     if(mousePressed == true){
+      l.location.x = mouseX;
+      l.location.y = mouseY;
+     }
+    }
+  }
 }
 
 void keyPressed(){

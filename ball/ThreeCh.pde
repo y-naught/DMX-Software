@@ -2,6 +2,7 @@ class ThreeCh{
   int[] channel;
   color c;
   PVector location;
+  float sz = 20;
   
   ThreeCh(int stCh, PVector loc){
    channel = new int[3];
@@ -26,6 +27,6 @@ class ThreeCh{
   void display(){
     noStroke();
     fill(255);
-   rect(location.x, location.y, 20, 20);
+   rect(location.x, location.y, sz, sz);
   }
 }

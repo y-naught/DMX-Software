@@ -1,3 +1,29 @@
+class Shower{
+ ArrayList<Particle> Particles;
+ int perFrame;
+ float sz;
+ Shower(int count, float s){
+  Particles = new ArrayList<Particle>();
+  perFrame = count;
+  sz = s;
+ }
+ 
+ void run(PGraphics g){
+   for(int i = 0; i < perFrame; i++){
+     Particles.add(new Particle(sz));
+   }
+   for(int i = 0; i < Particles.size(); i++){
+    Particle p = Particles.get(i);
+    if(p.isDead()){
+      Particles.remove(i);
+    }else{
+     p.update();
+     p.display(g);
+    }
+   }
+ }
+}
+
 class Particle{
  PVector location;
  PVector velocity;

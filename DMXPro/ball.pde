@@ -18,10 +18,10 @@ class Ball{
  void checkEdges(){
    if(bounce == true){
    if(location.x <= 0 || location.x >= width){
-     velocity.mult(-1);
+     velocity.x *=-1;
    }
    if(location.y <= 0 || location.y >=height){
-    velocity.mult(-1); 
+    velocity.y *= -1; 
    }
    }else{
     if(location.x <= 0){
@@ -47,8 +47,10 @@ class Ball{
  }
  
  //takes the PGraphics you want to effect and applies the ball to it
- void display(PGraphics img){
-   img.ellipse(location.x, location.y, sz, sz);
+ void display(PGraphics g){
+   fill(255);
+   noStroke();
+   g.ellipse(location.x, location.y, sz, sz);
  }
  
  //capibility of adding an outside force on each ball

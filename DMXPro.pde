@@ -5,7 +5,7 @@ int numEffects = 3;
 boolean modes[] = new boolean[numEffects];
 
 int totalChannels;
-PGraphics sampleImage;
+ArrayList<PGraphics> Layers;
 
 DmxP512 dmxOutput;
 int universeSize = 256;
@@ -23,7 +23,11 @@ void setup(){
   dmxOutput = new DmxP512(this, universeSize, false);
   dmxOutput.setupDmxPro(DMXPRO_PORT, DMXPRO_BAUDRATE);
   
-  sampleImage = createGraphics(width, height, P2D);
+  Layers = new ArrayList<PGraphics>();
+  for(int i = 0; i < numEffects; i++){
+   Layers.add(createGraphics(width, height, P2D));
+  }
+  
   //create an array list for each type of light
   Lights3Ch = new ArrayList<ThreeCh>();
   
@@ -49,23 +53,31 @@ void setup(){
 void draw(){
   //Mouse Controlled HSB
   if(modes[0] == true){
-  sampleImage.beginDraw();
-  sampleImage.colorMode(HSB);
-  sampleImage.background(mouseX,mouseY,255);
-  sampleImage.endDraw();
+  PGraphics g = Layers.get(0);
+  g.beginDraw();
+  g.colorMode(HSB);
+  g.background(mouseX,mouseY,255);
+  g.endDraw();
   
-  sampleImage.loadPixels();
+  g.loadPixels();
   }
   else if(modes[1] == true){
-    
-    sampleImage.beginDraw();
-    sampleImage.background(0);
+    PGraphics g = Layers.get(1);
+    g.beginDraw();
+    g.background(0);
     for(int i = 0; i < balls.length; i++){
       balls[i].checkEdges();
       balls[i].update();
-      balls[i].display(sampleImage);
+      balls[i].display(g);
     }
-    sampleImage.endDraw();
+    g.endDraw();
+  }
+  else if(modes[2] == true){
+    PGraphics g = Layers.get(2);
+    g.beginDraw();
+    g.background(0);
+    //make something here
+    g.endDraw();
   }
   
   for(int i = 0; i < Lights3Ch.size(); i+=3){
@@ -93,6 +105,15 @@ void keyPressed(){
  if(key == '2'){
    for(int i = 0; i < modes.length; i++){
    if(i == 1){
+    modes[i] = true; 
+   }else{
+    modes[i] = false;
+   }
+  }
+ }
+ if(key == '3'){
+   for(int i = 0; i < modes.length; i++){
+   if(i == 2){
     modes[i] = true; 
    }else{
     modes[i] = false;

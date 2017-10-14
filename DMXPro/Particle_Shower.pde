@@ -56,6 +56,8 @@ class Particle{
  }
  //takes the graphic you want to effect and adds the particle
  void display(PGraphics g){
+   fill(255);
+   noStroke();
    g.ellipse(location.x, location.y, sz, sz);
  }
  

@@ -24,9 +24,9 @@ float ballSize = 30;
 
 //Calls an object that uses the particle class to evenly shower from the top to bottom
 Shower shower;
-float pSize = 20;
+float pSize = 10;
 //number of particles generated per frame in draw if switched on
-int pCount = 10;
+int pCount = 5;
 
 
 void setup(){
@@ -112,6 +112,7 @@ void draw(){
     g.background(0);
     shower.run(g);
     g.endDraw();
+    image(g,0,0);
   }
   
   if(mousePressed == true){

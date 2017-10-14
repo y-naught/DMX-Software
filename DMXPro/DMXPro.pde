@@ -4,7 +4,7 @@ ArrayList<ThreeCh> Lights3Ch;
 int numLights = 5;
 
 //set the number of pre-created effects here and create a switch for each effect
-int numEffects = 3;
+int numEffects = 5;
 ArrayList<Boolean> modes;
 
 //variable for total number of effects
@@ -28,6 +28,10 @@ float pSize = 10;
 //number of particles generated per frame in draw if switched on
 int pCount = 5;
 
+//rotating rectangle at the center of the screen
+float rectWidth = 50;
+
+RadialGradient radGrad;
 
 void setup(){
   size(500,500,P2D);
@@ -66,6 +70,8 @@ void setup(){
   
   //initializes the Shower preset effect
   shower = new Shower(pCount, pSize);
+  
+  radGrad = new RadialGradient(100.0, 2.0);
   
   //start the program with the first effect on
   for(int i = 0; i < modes.size(); i++){
@@ -111,6 +117,32 @@ void draw(){
     g.beginDraw();
     g.background(0);
     shower.run(g);
+    g.endDraw();
+    image(g,0,0);
+  }
+  
+  //rotating rectangle
+  else if(modes.get(3)){
+    PGraphics g = Layers.get(3);
+    g.rectMode(CENTER);
+    g.beginDraw();
+    g.background(0);
+    g.pushMatrix();
+    g.translate(width / 2, height / 2);
+    g.rotate(TWO_PI * (frameCount % 120) / 240);
+    g.rect(0, 0, rectWidth, width * 1.5);
+    g.popMatrix();
+    g.endDraw();
+    image(g,0,0);
+  }
+  
+  //radial gradient flow
+  else if(modes.get(4)){
+    PGraphics g = Layers.get(4);
+    g.colorMode(HSB, 255, 255, 255);
+    g.beginDraw();
+    g.background(0);
+    radGrad.display(g);
     g.endDraw();
     image(g,0,0);
   }
@@ -180,6 +212,32 @@ void keyPressed(){
  if(key == '3'){
    for(int i = 0; i < modes.size(); i++){
    if(i == 2){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
+ if(key == '4'){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 3){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
+ if(key == '5'){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 4){
     Boolean m = modes.get(i);
     m = true; 
     modes.set(i, m);

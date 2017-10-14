@@ -191,6 +191,3 @@ void keyPressed(){
   }
  }
 }
-void mousePressed(){
- lightArranger(Lights3Ch);
-}

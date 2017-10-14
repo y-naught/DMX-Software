@@ -1,3 +1,4 @@
+import processing.serial.*;
 import dmxP512.*;
 
 ArrayList<ThreeCh> Lights3Ch;
@@ -12,10 +13,10 @@ int totalChannels;
 ArrayList<PGraphics> Layers;
 
 //start the DMX libaray this is build on top of with necessary variables
-//DmxP512 dmxOutput;
-//int universeSize = 256;
-//String DMXPRO_PORT = "COM4";
-//int DMXPRO_BAUDRATE = 115000;
+DmxP512 dmxOutput;
+int universeSize = 256;
+String DMXPRO_PORT = "COM5";
+int DMXPRO_BAUDRATE = 115000;
 
 //Initialize the array for Boucing Balls effect with variables for 
 ArrayList<Ball> balls;
@@ -40,8 +41,8 @@ void setup(){
   //colorMode(RGB);
   
   //DMX setup procedure
-  //dmxOutput = new DmxP512(this, universeSize, false);
-  //dmxOutput.setupDmxPro(DMXPRO_PORT, DMXPRO_BAUDRATE);
+  dmxOutput = new DmxP512(this, universeSize, false);
+  dmxOutput.setupDmxPro(DMXPRO_PORT, DMXPRO_BAUDRATE);
   
   modes = new ArrayList<Boolean>(numEffects);
   for(int i = 0; i < numEffects; i++){
@@ -160,9 +161,9 @@ void draw(){
   for(int i = 0; i < Lights3Ch.size(); i++){
     ThreeCh l = Lights3Ch.get(i);
     color c = l.sampleColor(g);
-    //dmxOutput.set(i, int(red(c)));
-    //dmxOutput.set(i+1, int(green(c)));
-    //dmxOutput.set(i+2, int(blue(c)));
+    dmxOutput.set(i, int(red(c)));
+    dmxOutput.set(i+1, int(green(c)));
+    dmxOutput.set(i+2, int(blue(c)));
     noStroke();
     fill(c);
     l.display();

@@ -5,27 +5,25 @@ class RadialGradient{
  //how many circles there are -- the larger the number the smoother the gradient
  float smoothness;
  float speed;
- 
+ float radius = 1;
  RadialGradient(float sm, float sp){
   hue = 0;
-  saturation = 255;
-  brightness = 255;
+  saturation = 200;
+  brightness = 200;
   smoothness = sm;
   speed = sp;
  }
  
  void display(PGraphics g){
-   
-   float radius = 1;
-   float distance = width * 1.5 / smoothness;
-   colorMode(HSB, 255, 255, 255);
-   
-  for(int i = 0; i < smoothness; i++){
-    fill(hue, saturation, brightness);
-    noStroke();
-    g.ellipse(width / 2, height / 2, radius, radius);
-    radius += distance;
-    hue = (hue + speed) % 255;
+   //float distance = width * 1.5 / smoothness;
+   g.colorMode(HSB);
+   g.ellipseMode(RADIUS);
+   g.noFill();
+   g.strokeWeight(30);
+   for(int i = 0; i < width / 1.5; i+=30){
+    g.stroke(hue, saturation, brightness);
+    g.ellipse(width / 2, height / 2, i, i);
+    hue = (hue + 1.0) % 255;
   }
  }
 }

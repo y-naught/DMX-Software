@@ -36,6 +36,7 @@ class ThreeCh{
   void display(){
     noStroke();
     fill(255);
-   rect(location.x, location.y, sz, sz);
+    rect(location.x, location.y, sz, sz);
+    text(channel[0], location.x, location.y);
   }
 }

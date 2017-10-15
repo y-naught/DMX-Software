@@ -2,7 +2,7 @@ import processing.serial.*;
 import dmxP512.*;
 
 ArrayList<ThreeCh> Lights3Ch;
-int numLights = 5;
+int numLights = 14;
 
 //set the number of pre-created effects here and create a switch for each effect
 int numEffects = 5;
@@ -21,16 +21,18 @@ int DMXPRO_BAUDRATE = 115000;
 //Initialize the array for Boucing Balls effect with variables for 
 ArrayList<Ball> balls;
 int numBalls = 40;
-float ballSize = 30;
+float ballSize = 50;
 
 //Calls an object that uses the particle class to evenly shower from the top to bottom
 Shower shower;
-float pSize = 10;
+float pSize = 5;
 //number of particles generated per frame in draw if switched on
-int pCount = 5;
+int pCount = 20;
 
 //rotating rectangle at the center of the screen
-float rectWidth = 50;
+float rectWidth = 20;
+float rotationSpeed = 100; 
+//inverse of what you think
 
 RadialGradient radGrad;
 
@@ -38,6 +40,7 @@ void setup(){
   size(500,500,P2D);
   rectMode(CENTER);
   colorMode(HSB);
+  frameRate(30);
   //colorMode(RGB);
   
   //DMX setup procedure
@@ -58,10 +61,16 @@ void setup(){
   //create an array list for each type of light
   Lights3Ch = new ArrayList<ThreeCh>();
   
+  float currentAngle = 0;
+  float radius = 200.0;
   //add your lights
+  
   for(int i = 0; i < numLights; i++){
-    Lights3Ch.add(new ThreeCh(i*3, new PVector(i * width / 10, height / 2)));
+    PVector nextLoc = new PVector(radius * sin(currentAngle) + width / 2,radius * cos(currentAngle) + height / 2);
+    Lights3Ch.add(new ThreeCh(i*3,nextLoc));
+    currentAngle += numLights / PI;
   }
+
   
   //Creates a the arrayList for the Bouncing Ball preset effect
   balls = new ArrayList<Ball>(numBalls);
@@ -72,7 +81,7 @@ void setup(){
   //initializes the Shower preset effect
   shower = new Shower(pCount, pSize);
   
-  radGrad = new RadialGradient(100.0, 2.0);
+  radGrad = new RadialGradient(50.0, 4.0);
   
   //start the program with the first effect on
   for(int i = 0; i < modes.size(); i++){
@@ -85,6 +94,8 @@ void setup(){
 }
 
 void draw(){
+  //background(0);
+  
   //Mouse Controlled HSB
   if(modes.get(0)){
   PGraphics g = Layers.get(0);
@@ -130,7 +141,7 @@ void draw(){
     g.background(0);
     g.pushMatrix();
     g.translate(width / 2, height / 2);
-    g.rotate(TWO_PI * (frameCount % 120) / 240);
+    g.rotate(TWO_PI * (frameCount % rotationSpeed / 2) / rotationSpeed);
     g.rect(0, 0, rectWidth, width * 1.5);
     g.popMatrix();
     g.endDraw();
@@ -140,7 +151,8 @@ void draw(){
   //radial gradient flow
   else if(modes.get(4)){
     PGraphics g = Layers.get(4);
-    g.colorMode(HSB, 255, 255, 255);
+    //g.colorMode(HSB, 255, 255, 255);
+    //g.ellipseMode(RADIUS);
     g.beginDraw();
     g.background(0);
     radGrad.display(g);
@@ -158,12 +170,15 @@ void draw(){
       PGraphics g = Layers.get(j);
       
       //iterates through all the lights and applies color to all the 3 channel lights
-  for(int i = 0; i < Lights3Ch.size(); i++){
-    ThreeCh l = Lights3Ch.get(i);
+  for(int i = 1; i < Lights3Ch.size() * 3; i++){
+    colorMode(HSB);
+    ThreeCh l = Lights3Ch.get(i / 3);
     color c = l.sampleColor(g);
     dmxOutput.set(i, int(red(c)));
-    dmxOutput.set(i+1, int(green(c)));
-    dmxOutput.set(i+2, int(blue(c)));
+    i++;
+    dmxOutput.set(i, int(green(c)));
+    i++;
+    dmxOutput.set(i, int(blue(c)));
     noStroke();
     fill(c);
     l.display();
@@ -176,7 +191,7 @@ void draw(){
 void lightArranger(ArrayList<ThreeCh> lights){
   for(int i = 0; i < lights.size(); i++){
     ThreeCh l = lights.get(i);
-    if(mouseX > l.location.x - l.sz && mouseX < l.location.x + l.sz && mouseY > l.location.y - l.sz && mouseY- l.sz < l.location.y + l.sz){
+    if(mouseX > l.location.x - l.sz / 2 && mouseX < l.location.x + l.sz / 2 && mouseY > l.location.y - l.sz / 2 && mouseY- l.sz / 2 < l.location.y + l.sz / 2){
       l.move(mouseX, mouseY);
     }
   }

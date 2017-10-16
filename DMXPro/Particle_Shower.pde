@@ -37,6 +37,7 @@ class Shower{
 
 //a Particle class with a basic physics engine for use in multiple effect presets
 class Particle{
+  
  PVector location;
  PVector velocity;
  PVector acceleration;
@@ -48,12 +49,15 @@ class Particle{
  float speed;
  int startFrame;
  
+ 
  Particle(float s){
   location = new PVector(random(0, width), 0);
   velocity = new PVector(0, random(3, 7));
   acceleration = new PVector(0, 0);
   sz = s;
   startFrame = frameCount;
+  
+  //the function that chooses the probability of each particle to be an offset color
   float rand = random(1);
   if(rand < 0.15){
     hueOffset = 127;
@@ -66,6 +70,7 @@ class Particle{
   }
  }
  
+ 
  //applying the physics for each particle
  void update(float hu, float sat, float bri, float Sp, float siz, boolean oneC){
    sz = siz;
@@ -74,6 +79,8 @@ class Particle{
    velocity.mult(speed);
   velocity.add(acceleration);
   location.add(velocity);
+  
+  //a switch for whether or not the function is using multiple colors
   if(oneC){
    hue = hu; 
   }
@@ -83,6 +90,8 @@ class Particle{
   saturation = sat;
   brightness = bri;
  }
+ 
+ 
  //takes the graphic you want to effect and adds the particle
  void display(PGraphics g){
    g.colorMode(HSB);
@@ -91,9 +100,9 @@ class Particle{
    g.ellipse(location.x, location.y, sz, sz);
  }
  
- //a function that can be called to delete the particle after it leaves the display window
+ //a function that can be called to delete the particle after it leaves the display window or has been there for 1000 frames
  boolean isDead(){
-  if(frameCount - startFrame > 10000){
+  if(frameCount - startFrame > 1000){
      return true;
    }
   else if(location.y > height){

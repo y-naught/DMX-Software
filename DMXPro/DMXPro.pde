@@ -2,14 +2,20 @@ import processing.serial.*;
 import dmxP512.*;
 import themidibus.*;
 
+//decalre the handler for the midi controller
 MidiBus bus;
 
+
+
+//contains all ofthe 3 channel light fixture information
 ArrayList<ThreeCh> Lights3Ch;
 int numLights = 14;
 
 //set the number of pre-created effects here and create a switch for each effect
 int numEffects = 7;
 ArrayList<Boolean> modes;
+
+
 
 //variable for total number of effects
 int totalChannels;
@@ -21,11 +27,17 @@ int universeSize = 256;
 String DMXPRO_PORT = "COM5";
 int DMXPRO_BAUDRATE = 115000;
 
+
+
+//a switch between using one color or an array of colors with a preset effect
 boolean oneColor = true;
 
+//the global hue, sat, and brightness  values that get passed into each preset
 int hue = 0;
 int saturation = 255;
 int brightness = 255;
+
+
 
 //Initialize the array for Boucing Balls effect with variables for 
 ArrayList<Ball> balls;
@@ -45,6 +57,7 @@ float rectWidth = 20;
 float rotationSpeed = 100; 
 //inverse of what you think
 
+//radial gradient function
 RadialGradient radGrad;
 
 LinearGradient linGrad;
@@ -54,13 +67,17 @@ PNoise noise;
 float noiseMX = 0;
 float noiseMY = 0;
 float noiseInc = 0.01;
+int noiseMode = 0;
+
+
+
 
 void setup(){
   size(500,500,P2D);
   rectMode(CENTER);
   colorMode(HSB);
   frameRate(30);
-  //colorMode(RGB);
+  
   
   bus = new MidiBus(this, 0, -1);
   
@@ -82,10 +99,12 @@ void setup(){
   //create an array list for each type of light
   Lights3Ch = new ArrayList<ThreeCh>();
   
+  
+  // setup for distributing the light fixtures into to the window about a circle
   float currentAngle = PI / 2;
   float radius = 200.0;
-  //add your lights
   
+  //add your lights
   for(int i = 0; i < numLights; i++){
     PVector nextLoc = new PVector(radius * sin(currentAngle) + width / 2,radius * cos(currentAngle) + height / 2);
     Lights3Ch.add(new ThreeCh(i*3,nextLoc));
@@ -102,11 +121,16 @@ void setup(){
   //initializes the Shower preset effect
   shower = new Shower(pCount, pSize);
   
+  //initialize the radial gradient preset effect
   radGrad = new RadialGradient(50.0, 4.0);
   
+  //initialize the linear gradient preset effect
   linGrad = new LinearGradient();
   
+  //initialize the 2D perlin noise effect
   noise = new PNoise(hue, brightness, saturation, noiseMX, noiseMY, noiseInc);
+  
+  
   
   //start the program with the first effect on
   for(int i = 0; i < modes.size(); i++){
@@ -122,21 +146,21 @@ void setup(){
 
 
 void draw(){
-  //background(0);
   
-  //Mouse Controlled HSB
+  //Solid Color in the window
   if(modes.get(0)){
   PGraphics g = Layers.get(0);
   g.beginDraw();
   g.colorMode(HSB);
   g.background(hue, saturation, brightness);
   g.endDraw();
-  
   image(g, 0, 0);
   }
   
-  //Bouncing Balls
+  
+  //Bouncing Balls Effect
   else if(modes.get(1)){
+    //add or remove from the array depending on what the numBalls variable is set to
     if(balls.size() != numBalls){
      while(balls.size() < numBalls){
       balls.add(new Ball(ballSize)); 
@@ -145,6 +169,7 @@ void draw(){
       balls.remove(int(random(balls.size())));
      }
     }
+    
     PGraphics g = Layers.get(1);
     g.beginDraw();
     g.background(0);
@@ -155,9 +180,9 @@ void draw(){
       b.display(g);
     }
     g.endDraw();
-    
     image(g, 0, 0);
   }
+  
   
   //Particle Shower
   else if(modes.get(2)){
@@ -168,6 +193,7 @@ void draw(){
     g.endDraw();
     image(g,0,0);
   }
+  
   
   //rotating rectangle
   else if(modes.get(3)){
@@ -186,6 +212,7 @@ void draw(){
     image(g,0,0);
   }
   
+  
   //radial gradient flow
   else if(modes.get(4)){
     PGraphics g = Layers.get(4);
@@ -198,6 +225,7 @@ void draw(){
     image(g,0,0);
   }
   
+  
   //linear gradient
   else if(modes.get(5)){
     PGraphics g = Layers.get(5);
@@ -209,6 +237,7 @@ void draw(){
     image(g,0,0);
   }
   
+  
   //perlin noise field
   else if(modes.get(6)){
     PGraphics g = Layers.get(6);
@@ -219,16 +248,22 @@ void draw(){
     image(g,0,0);
   }
   
+  
+  
+  //this uses the move lights function of you press the mouse over any of the lights
   if(mousePressed == true){
    lightArranger(Lights3Ch); 
   }
+  
+  
   
   //this function runs through all the switches and applies the layer to the light color calculator
   for(int j = 0; j < modes.size(); j++){
     if(modes.get(j) == true){
       PGraphics g = Layers.get(j);
-      
-      //iterates through all the lights and applies color to all the 3 channel lights
+  
+  
+  //iterates through all the lights and applies color to all the 3 channel lights
   for(int i = 1; i < Lights3Ch.size() * 3; i++){
     colorMode(HSB);
     ThreeCh l = Lights3Ch.get(i / 3);
@@ -246,6 +281,8 @@ void draw(){
  }
 }
 
+
+
 //calling this function will allow you to click on the lights in the window and arrange them on the running effect
 void lightArranger(ArrayList<ThreeCh> lights){
   for(int i = 0; i < lights.size(); i++){
@@ -255,6 +292,8 @@ void lightArranger(ArrayList<ThreeCh> lights){
     }
   }
 }
+
+
 
 //currently usingthe keys on the keyboard to switch between effects
 void keyPressed(){
@@ -357,8 +396,27 @@ void keyPressed(){
    oneColor = true; 
   }
  }
+ if(key == 'b'){
+   if(noiseMode != 0){
+    noiseMode = 0; 
+   }
+ }
+ if(key == 'n'){
+   if(noiseMode != 1){
+    noiseMode = 1; 
+   }
+ }
+ if(key == 'm'){
+   if(noiseMode != 2){
+    noiseMode = 2; 
+   }
+ }
 }
 
+
+
+
+//the sliders on the midi controller
 void controllerChange(int channel, int number, int value){
  if(number == 48){
    hue = value * 2;
@@ -419,6 +477,10 @@ void controllerChange(int channel, int number, int value){
  }
 }
 
+
+
+
+//the buttons on the midi controller
 void noteOn(Note note){
   if(note.pitch() == 56){
     for(int i = 0; i < modes.size(); i++){
@@ -510,5 +572,5 @@ void noteOn(Note note){
     modes.set(i, m);
    }
   }
-  }
+ }
 }

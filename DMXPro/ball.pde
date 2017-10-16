@@ -5,6 +5,10 @@ class Ball{
  PVector acceleration;
  boolean bounce = true;
  float sz;
+ float speed;
+ float hue = 0;
+ float saturation = 0;
+ float brightness = 255;
  
  //constructor takes just the size of the ball
  Ball(float s){
@@ -40,16 +44,23 @@ class Ball{
  }
  
  //applies physics engine to each ball
- void update(){
+ void update(float s, float sp, float hu, float sat, float bri){
+   velocity.normalize();
+   velocity.mult(sp);
    velocity.add(acceleration);
    location.add(velocity);
    acceleration.mult(0);
+   sz = s;
+   hue = hu;
+   saturation = sat;
+   brightness = bri;
  }
  
  //takes the PGraphics you want to effect and applies the ball to it
  void display(PGraphics g){
-   fill(255);
-   noStroke();
+   g.colorMode(HSB);
+   g.fill(hue, saturation, brightness);
+   g.noStroke();
    g.ellipse(location.x, location.y, sz, sz);
  }
  

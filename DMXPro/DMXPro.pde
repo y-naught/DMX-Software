@@ -1,5 +1,8 @@
 import processing.serial.*;
 import dmxP512.*;
+import themidibus.*;
+
+MidiBus bus;
 
 ArrayList<ThreeCh> Lights3Ch;
 int numLights = 14;
@@ -18,10 +21,15 @@ int universeSize = 256;
 String DMXPRO_PORT = "COM5";
 int DMXPRO_BAUDRATE = 115000;
 
+int hue = 0;
+int saturation = 255;
+int brightness = 255;
+
 //Initialize the array for Boucing Balls effect with variables for 
 ArrayList<Ball> balls;
 int numBalls = 40;
 float ballSize = 50;
+float ballSpeed = 5;
 
 //Calls an object that uses the particle class to evenly shower from the top to bottom
 Shower shower;
@@ -43,6 +51,8 @@ void setup(){
   frameRate(30);
   //colorMode(RGB);
   
+  bus = new MidiBus(this, 0, -1);
+  
   //DMX setup procedure
   dmxOutput = new DmxP512(this, universeSize, false);
   dmxOutput.setupDmxPro(DMXPRO_PORT, DMXPRO_BAUDRATE);
@@ -61,14 +71,14 @@ void setup(){
   //create an array list for each type of light
   Lights3Ch = new ArrayList<ThreeCh>();
   
-  float currentAngle = 0;
+  float currentAngle = PI / 2;
   float radius = 200.0;
   //add your lights
   
   for(int i = 0; i < numLights; i++){
     PVector nextLoc = new PVector(radius * sin(currentAngle) + width / 2,radius * cos(currentAngle) + height / 2);
     Lights3Ch.add(new ThreeCh(i*3,nextLoc));
-    currentAngle += numLights / PI;
+    currentAngle += (numLights) / TWO_PI;
   }
 
   
@@ -101,7 +111,7 @@ void draw(){
   PGraphics g = Layers.get(0);
   g.beginDraw();
   g.colorMode(HSB);
-  g.background(map(mouseX, 0, width, 0, 255), map(mouseY, 0, height, 0, 255), 255);
+  g.background(hue, saturation, brightness);
   g.endDraw();
   
   image(g, 0, 0);
@@ -109,13 +119,21 @@ void draw(){
   
   //Bouncing Balls
   else if(modes.get(1)){
+    if(balls.size() != numBalls){
+     while(balls.size() < numBalls){
+      balls.add(new Ball(ballSize)); 
+     }
+     while(balls.size() > numBalls){
+      balls.remove(int(random(balls.size())));
+     }
+    }
     PGraphics g = Layers.get(1);
     g.beginDraw();
     g.background(0);
     for(int i = 0; i < balls.size(); i++){
       Ball b = balls.get(i);
       b.checkEdges();
-      b.update();
+      b.update(ballSize, ballSpeed, hue, saturation, brightness);
       b.display(g);
     }
     g.endDraw();
@@ -264,4 +282,105 @@ void keyPressed(){
    }
   }
  }
+}
+
+void controllerChange(int channel, int number, int value){
+ if(number == 48){
+   hue = value * 2;
+ }
+ if(number == 49){
+   saturation = value * 2;
+ }
+ if(number == 50){
+   brightness = value * 2;
+ }
+ if(number == 51){
+   if(modes.get(1)){
+     ballSize = map(value, 0, 127, 0, 50);
+   }
+ }
+ if(number == 52){
+   if(modes.get(1)){
+    numBalls = int(map(value, 0, 127, 0, 100)); 
+   }
+ }
+ if(number == 53){ 
+   ballSpeed = map(value, 0, 127, 0, 50);
+ }
+ if(number == 54){
+ }
+ if(number == 55){
+ }
+ if(number == 56){
+ }
+}
+
+void noteOn(Note note){
+  if(note.pitch() == 56){
+    for(int i = 0; i < modes.size(); i++){
+   if(i == 0){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+  }
+  if(note.pitch() == 57){
+    for(int i = 0; i < modes.size(); i++){
+   if(i == 1){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+  }
+  if(note.pitch() == 58){
+    for(int i = 0; i < modes.size(); i++){
+   if(i == 2){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+  }
+  if(note.pitch() == 59){
+    for(int i = 0; i < modes.size(); i++){
+   if(i == 3){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+    }
+   }
+  }
+  if(note.pitch() == 60){
+    for(int i = 0; i < modes.size(); i++){
+   if(i == 4){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+  }
+  if(note.pitch() == 61){
+  }
 }

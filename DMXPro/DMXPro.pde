@@ -9,10 +9,10 @@ MidiBus bus;
 
 //contains all ofthe 3 channel light fixture information
 ArrayList<ThreeCh> Lights3Ch;
-int numLights = 14;
+int numLights = 17;
 
 //set the number of pre-created effects here and create a switch for each effect
-int numEffects = 7;
+int numEffects = 8;
 ArrayList<Boolean> modes;
 
 
@@ -69,7 +69,9 @@ float noiseMY = 0;
 float noiseInc = 0.01;
 int noiseMode = 0;
 
-
+TwoColorGradient twoColGrad;
+float gradientSpeed = 1;
+float gradW = 200;
 
 
 void setup(){
@@ -101,7 +103,7 @@ void setup(){
   
   
   // setup for distributing the light fixtures into to the window about a circle
-  float currentAngle = PI / 2;
+  float currentAngle =  PI / 3;
   float radius = 200.0;
   
   //add your lights
@@ -130,7 +132,7 @@ void setup(){
   //initialize the 2D perlin noise effect
   noise = new PNoise(hue, brightness, saturation, noiseMX, noiseMY, noiseInc);
   
-  
+  twoColGrad = new TwoColorGradient();
   
   //start the program with the first effect on
   for(int i = 0; i < modes.size(); i++){
@@ -244,6 +246,17 @@ void draw(){
     g.beginDraw();
     g.background(0);
     noise.update(g, hue, saturation, brightness, noiseMX, noiseMY, noiseInc, noiseMode);
+    g.endDraw();
+    image(g,0,0);
+  }
+  
+  else if(modes.get(7)){
+    PGraphics g = Layers.get(7);
+    g.colorMode(HSB);
+    g.beginDraw();
+    g.background(hue, saturation, brightness);
+    twoColGrad.checkEdges();
+    twoColGrad.display(g, gradientSpeed, hue, saturation, brightness, gradW);
     g.endDraw();
     image(g,0,0);
   }
@@ -388,6 +401,19 @@ void keyPressed(){
    }
   }
  }
+ if(key == '8'){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 7){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
  if(key == 'c'){
   if(oneColor == true){
    oneColor = false; 
@@ -443,6 +469,9 @@ void controllerChange(int channel, int number, int value){
    else if(modes.get(6)){
     noiseMX = map(value, 0, 127, -0.50, 0.50); 
    }
+   else if(modes.get(7)){
+    gradientSpeed = map(value, 0, 127, 0, 40);
+   }
  }
  if(number == 52){
    if(modes.get(1)){
@@ -456,6 +485,9 @@ void controllerChange(int channel, int number, int value){
    }
    else if(modes.get(6)){
     noiseMY = map(value, 0, 127, -0.50, 0.50); 
+   }
+   else if(modes.get(7)){
+    gradW = map(value, 0, 127, 0, width); 
    }
  }
  if(number == 53){ 
@@ -492,8 +524,8 @@ void noteOn(Note note){
     Boolean m = modes.get(i);
     m = false; 
     modes.set(i, m);
+    }
    }
-  }
   }
   if(note.pitch() == 57){
     for(int i = 0; i < modes.size(); i++){
@@ -505,8 +537,8 @@ void noteOn(Note note){
     Boolean m = modes.get(i);
     m = false; 
     modes.set(i, m);
+    }
    }
-  }
   }
   if(note.pitch() == 58){
     for(int i = 0; i < modes.size(); i++){
@@ -518,8 +550,8 @@ void noteOn(Note note){
     Boolean m = modes.get(i);
     m = false; 
     modes.set(i, m);
+    }
    }
-  }
   }
   if(note.pitch() == 59){
     for(int i = 0; i < modes.size(); i++){
@@ -570,6 +602,19 @@ void noteOn(Note note){
     Boolean m = modes.get(i);
     m = false; 
     modes.set(i, m);
+    }
+   }
+  }
+  if(note.pitch() == 63){
+    for(int i = 0; i < modes.size(); i++){
+   if(i == 7){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
    }
   }
  }
@@ -596,4 +641,4 @@ void noteOn(Note note){
     noiseMode = 2; 
    }
  }
-}
+  }

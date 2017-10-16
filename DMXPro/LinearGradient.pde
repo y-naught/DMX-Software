@@ -15,11 +15,13 @@ class LinearGradient{
   
   void updateColor(float hue, float saturation, float brightness, float offset){
     colOffset = offset;
-    c1 = color((hue), saturation, brightness);
+    colorMode(HSB);
+    c1 = color((hue % 255), saturation, brightness);
     c2 = color(((hue + colOffset) % 255), saturation, brightness);
   }
   
   void display(PGraphics g){
+    g.colorMode(HSB, 255,255,255);
     g.background(0);
     g.strokeWeight(spacing);
     for(int i = 0; i < width; i += spacing){

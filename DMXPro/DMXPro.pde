@@ -366,11 +366,14 @@ void controllerChange(int channel, int number, int value){
    else if(modes.get(2)){
     pSize = map(value, 0, 127, 0, 20);
    }
+   else if(modes.get(3)){
+    rectWidth = map(value, 0, 127, 0, 200); 
+   }
    else if(modes.get(5)){
     linGradOffset = map(value, 0, 127, 0, 255); 
    }
    else if(modes.get(6)){
-    noiseMX = map(value, 0, 127, -30, 30); 
+    noiseMX = map(value, 0, 127, -0.50, 0.50); 
    }
  }
  if(number == 52){
@@ -380,8 +383,11 @@ void controllerChange(int channel, int number, int value){
    else if(modes.get(2)){
     pCount = int(map(value, 0, 127, 0, 50)); 
    }
+   else if(modes.get(3)){
+    rotationSpeed = map(value, 0, 127, -300, 300); 
+   }
    else if(modes.get(6)){
-    noiseMY = map(value, 0, 127, -30, -30); 
+    noiseMY = map(value, 0, 127, -0.50, 0.50); 
    }
  }
  if(number == 53){ 

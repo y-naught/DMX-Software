@@ -243,7 +243,7 @@ void draw(){
     PGraphics g = Layers.get(6);
     g.beginDraw();
     g.background(0);
-    noise.update(g, hue, saturation, brightness, noiseMX, noiseMY, noiseInc);
+    noise.update(g, hue, saturation, brightness, noiseMX, noiseMY, noiseInc, noiseMode);
     g.endDraw();
     image(g,0,0);
   }
@@ -452,7 +452,7 @@ void controllerChange(int channel, int number, int value){
     pCount = int(map(value, 0, 127, 0, 50)); 
    }
    else if(modes.get(3)){
-    rotationSpeed = map(value, 0, 127, -300, 300); 
+    rotationSpeed = map(value, 0, 127, 150, 20); 
    }
    else if(modes.get(6)){
     noiseMY = map(value, 0, 127, -0.50, 0.50); 
@@ -572,5 +572,28 @@ void noteOn(Note note){
     modes.set(i, m);
    }
   }
+ }
+ if(note.pitch() == 98){
+    if(oneColor == true){
+   oneColor = false; 
+  }
+  else{
+   oneColor = true; 
+  }
+ }
+ if(note.pitch() == 0){
+   if(noiseMode != 0){
+    noiseMode = 0; 
+   }
+ }
+ if(note.pitch() == 1){
+   if(noiseMode != 1){
+    noiseMode = 1; 
+   }
+ }
+ if(note.pitch() == 2){
+   if(noiseMode != 2){
+    noiseMode = 2; 
+   }
  }
 }

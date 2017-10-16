@@ -5,6 +5,9 @@ import themidibus.*;
 //decalre the handler for the midi controller
 MidiBus bus;
 
+float currentAngle = 0.10;
+float radius = 200.0;
+float lightSpacing = 0.37;
 
 
 //contains all ofthe 3 channel light fixture information
@@ -103,14 +106,13 @@ void setup(){
   
   
   // setup for distributing the light fixtures into to the window about a circle
-  float currentAngle =  PI / 3;
-  float radius = 200.0;
+  
   
   //add your lights
   for(int i = 0; i < numLights; i++){
     PVector nextLoc = new PVector(radius * sin(currentAngle) + width / 2,radius * cos(currentAngle) + height / 2);
     Lights3Ch.add(new ThreeCh(i*3,nextLoc));
-    currentAngle += (numLights) / TWO_PI;
+    currentAngle += (lightSpacing);
   }
 
   
@@ -304,6 +306,16 @@ void lightArranger(ArrayList<ThreeCh> lights){
       l.move(mouseX, mouseY);
     }
   }
+}
+
+void lightReset(ArrayList<ThreeCh> lights){
+ for(int i = 0; i < lights.size(); i ++){
+   float x = radius * sin(-currentAngle) + width / 2;
+   float y = radius * cos(-currentAngle) + height / 2;
+   currentAngle += lightSpacing;
+   ThreeCh l = lights.get(i);
+   l.move(x, y);
+ }
 }
 
 
@@ -506,6 +518,8 @@ void controllerChange(int channel, int number, int value){
  if(number == 55){
  }
  if(number == 56){
+   currentAngle = map(value, 0, 127, 0, TWO_PI);
+   lightReset(Lights3Ch);
  }
 }
 

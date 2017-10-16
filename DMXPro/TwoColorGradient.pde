@@ -29,8 +29,8 @@ class TwoColorGradient{
   }
   
   void checkEdges(){
-   if(location.x > width ){
-    location.x = 0; 
+   if(location.x > width + gradWidth / 2 ){
+    location.x = -gradWidth / 2; 
    }
   }
 }

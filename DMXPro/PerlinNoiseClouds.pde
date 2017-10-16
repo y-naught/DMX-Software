@@ -11,13 +11,13 @@ class PNoise{
   float offY;
   float curY;
   
-  PNoise(){
-    increment = 0.01;
-    moveX = 0.05;
-    moveY = 0.05;
-    hue = 0;
-    saturation = 255;
-    brightness = 255;
+  PNoise(float hu, float sat, float bri, float mx, float my, float inc){
+    increment = inc;
+    moveX = mx;
+    moveY = my;
+    hue = hu;
+    saturation = sat;
+    brightness = bri;
     offX = 0.0;
     curX = 0.0;
     offY = 0.0;
@@ -44,12 +44,12 @@ class PNoise{
      
      brightness = noise(offX, offY) * 255;
      
-     pixels[x + y * width] = color(hue, saturation, brightness);
+     g.pixels[x + y * width] = color(hue, saturation, brightness);
    }
    offY = curY;
   }
   
-  updatePixels();
+  g.updatePixels();
   curX += moveX;
   offX = curX;
   curY += moveY;

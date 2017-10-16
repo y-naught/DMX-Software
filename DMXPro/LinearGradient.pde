@@ -16,7 +16,7 @@ class LinearGradient{
   void updateColor(float hue, float saturation, float brightness, float offset){
     colOffset = offset;
     c1 = color((hue), saturation, brightness);
-    c2 = color((hue + colOffset % 255), saturation, brightness);
+    c2 = color(((hue + colOffset) % 255), saturation, brightness);
   }
   
   void display(PGraphics g){

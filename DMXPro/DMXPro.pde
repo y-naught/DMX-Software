@@ -8,7 +8,7 @@ ArrayList<ThreeCh> Lights3Ch;
 int numLights = 14;
 
 //set the number of pre-created effects here and create a switch for each effect
-int numEffects = 5;
+int numEffects = 7;
 ArrayList<Boolean> modes;
 
 //variable for total number of effects
@@ -47,6 +47,11 @@ RadialGradient radGrad;
 
 LinearGradient linGrad;
 float linGradOffset = 10;
+
+PNoise noise;
+float noiseMX = 0;
+float noiseMY = 0;
+float noiseInc = 0.01;
 
 void setup(){
   size(500,500,P2D);
@@ -97,6 +102,10 @@ void setup(){
   
   radGrad = new RadialGradient(50.0, 4.0);
   
+  linGrad = new LinearGradient();
+  
+  noise = new PNoise(hue, brightness, saturation, noiseMX, noiseMY, noiseInc);
+  
   //start the program with the first effect on
   for(int i = 0; i < modes.size(); i++){
     if(i == 0){
@@ -106,6 +115,9 @@ void setup(){
     }
   }
 }
+
+
+
 
 void draw(){
   //background(0);
@@ -184,12 +196,23 @@ void draw(){
     image(g,0,0);
   }
   
+  //linear gradient
   else if(modes.get(5)){
     PGraphics g = Layers.get(5);
     g.beginDraw();
     g.background(0);
     linGrad.updateColor(hue, saturation, brightness, linGradOffset);
     linGrad.display(g);
+    g.endDraw();
+    image(g,0,0);
+  }
+  
+  //perlin noise field
+  else if(modes.get(6)){
+    PGraphics g = Layers.get(6);
+    g.beginDraw();
+    g.background(0);
+    noise.update(g, hue, saturation, brightness, noiseMX, noiseMY, noiseInc);
     g.endDraw();
     image(g,0,0);
   }
@@ -311,6 +334,19 @@ void keyPressed(){
    }
   }
  }
+ if(key == '7'){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 6){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
 }
 
 void controllerChange(int channel, int number, int value){
@@ -333,13 +369,19 @@ void controllerChange(int channel, int number, int value){
    else if(modes.get(5)){
     linGradOffset = map(value, 0, 127, 0, 255); 
    }
+   else if(modes.get(6)){
+    noiseMX = map(value, 0, 127, -30, 30); 
+   }
  }
  if(number == 52){
    if(modes.get(1)){
     numBalls = int(map(value, 0, 127, 0, 100)); 
    }
-   if(modes.get(2)){
+   else if(modes.get(2)){
     pCount = int(map(value, 0, 127, 0, 50)); 
+   }
+   else if(modes.get(6)){
+    noiseMY = map(value, 0, 127, -30, -30); 
    }
  }
  if(number == 53){ 
@@ -348,6 +390,9 @@ void controllerChange(int channel, int number, int value){
    }
    else if(modes.get(2)){
     particleSpeed = map(value,0, 127, 0, 30); 
+   }
+   else if(modes.get(6)){
+    noiseInc = map(value,0, 127, 0.001, 0.08);
    }
  }
  if(number == 54){
@@ -427,6 +472,19 @@ void noteOn(Note note){
   if(note.pitch() == 61){
     for(int i = 0; i < modes.size(); i++){
    if(i == 5){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+  }
+  if(note.pitch() == 62){
+    for(int i = 0; i < modes.size(); i++){
+   if(i == 6){
     Boolean m = modes.get(i);
     m = true; 
     modes.set(i, m);

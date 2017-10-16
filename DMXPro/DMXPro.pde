@@ -45,6 +45,9 @@ float rotationSpeed = 100;
 
 RadialGradient radGrad;
 
+LinearGradient linGrad;
+float linGradOffset = 10;
+
 void setup(){
   size(500,500,P2D);
   rectMode(CENTER);
@@ -181,6 +184,16 @@ void draw(){
     image(g,0,0);
   }
   
+  else if(modes.get(5)){
+    PGraphics g = Layers.get(5);
+    g.beginDraw();
+    g.background(0);
+    linGrad.updateColor(hue, saturation, brightness, linGradOffset);
+    linGrad.display(g);
+    g.endDraw();
+    image(g,0,0);
+  }
+  
   if(mousePressed == true){
    lightArranger(Lights3Ch); 
   }
@@ -285,6 +298,19 @@ void keyPressed(){
    }
   }
  }
+ if(key == '6'){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 5){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
 }
 
 void controllerChange(int channel, int number, int value){
@@ -301,8 +327,11 @@ void controllerChange(int channel, int number, int value){
    if(modes.get(1)){
      ballSize = map(value, 0, 127, 0, 50);
    }
-   if(modes.get(2)){
+   else if(modes.get(2)){
     pSize = map(value, 0, 127, 0, 20);
+   }
+   else if(modes.get(5)){
+    linGradOffset = map(value, 0, 127, 0, 255); 
    }
  }
  if(number == 52){
@@ -396,5 +425,16 @@ void noteOn(Note note){
   }
   }
   if(note.pitch() == 61){
+    for(int i = 0; i < modes.size(); i++){
+   if(i == 5){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
   }
 }

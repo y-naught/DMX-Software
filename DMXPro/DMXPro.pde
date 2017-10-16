@@ -36,6 +36,7 @@ Shower shower;
 float pSize = 5;
 //number of particles generated per frame in draw if switched on
 int pCount = 20;
+float particleSpeed = 5;
 
 //rotating rectangle at the center of the screen
 float rectWidth = 20;
@@ -146,7 +147,7 @@ void draw(){
     PGraphics g = Layers.get(2);
     g.beginDraw();
     g.background(0);
-    shower.run(g);
+    shower.run(g, hue, saturation, brightness, particleSpeed, pCount, pSize);
     g.endDraw();
     image(g,0,0);
   }
@@ -154,12 +155,14 @@ void draw(){
   //rotating rectangle
   else if(modes.get(3)){
     PGraphics g = Layers.get(3);
+    g.colorMode(HSB);
     g.rectMode(CENTER);
     g.beginDraw();
     g.background(0);
     g.pushMatrix();
     g.translate(width / 2, height / 2);
     g.rotate(TWO_PI * (frameCount % rotationSpeed / 2) / rotationSpeed);
+    g.fill(hue, saturation, brightness);
     g.rect(0, 0, rectWidth, width * 1.5);
     g.popMatrix();
     g.endDraw();
@@ -298,14 +301,25 @@ void controllerChange(int channel, int number, int value){
    if(modes.get(1)){
      ballSize = map(value, 0, 127, 0, 50);
    }
+   if(modes.get(2)){
+    pSize = map(value, 0, 127, 0, 20);
+   }
  }
  if(number == 52){
    if(modes.get(1)){
     numBalls = int(map(value, 0, 127, 0, 100)); 
    }
+   if(modes.get(2)){
+    pCount = int(map(value, 0, 127, 0, 50)); 
+   }
  }
  if(number == 53){ 
+   if(modes.get(1)){
    ballSpeed = map(value, 0, 127, 0, 50);
+   }
+   else if(modes.get(2)){
+    particleSpeed = map(value,0, 127, 0, 30); 
+   }
  }
  if(number == 54){
  }

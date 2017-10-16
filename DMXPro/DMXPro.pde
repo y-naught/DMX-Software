@@ -21,6 +21,8 @@ int universeSize = 256;
 String DMXPRO_PORT = "COM5";
 int DMXPRO_BAUDRATE = 115000;
 
+boolean oneColor = true;
+
 int hue = 0;
 int saturation = 255;
 int brightness = 255;
@@ -149,7 +151,7 @@ void draw(){
     for(int i = 0; i < balls.size(); i++){
       Ball b = balls.get(i);
       b.checkEdges();
-      b.update(ballSize, ballSpeed, hue, saturation, brightness);
+      b.update(ballSize, ballSpeed, hue, saturation, brightness, oneColor);
       b.display(g);
     }
     g.endDraw();
@@ -162,7 +164,7 @@ void draw(){
     PGraphics g = Layers.get(2);
     g.beginDraw();
     g.background(0);
-    shower.run(g, hue, saturation, brightness, particleSpeed, pCount, pSize);
+    shower.run(g, hue, saturation, brightness, particleSpeed, pCount, pSize, oneColor);
     g.endDraw();
     image(g,0,0);
   }
@@ -345,6 +347,14 @@ void keyPressed(){
     m = false; 
     modes.set(i, m);
    }
+  }
+ }
+ if(key == 'c'){
+  if(oneColor == true){
+   oneColor = false; 
+  }
+  else{
+   oneColor = true; 
   }
  }
 }

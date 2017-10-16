@@ -15,7 +15,7 @@ class Shower{
  
  //calling this method in draw will run the particle shower
  //must have a graphic to apply the effect to as an argument of the method
- void run(PGraphics g, float hue, float saturation, float brightness, float particleSpeed, float nppf, float size){
+ void run(PGraphics g, float hue, float saturation, float brightness, float particleSpeed, float nppf, float size, boolean oneC){
    
    //adds particles every frame
    for(int i = 0; i < nppf; i++){
@@ -28,7 +28,7 @@ class Shower{
     if(p.isDead()){
       Particles.remove(i);
     }else{
-     p.update(hue, saturation, brightness, particleSpeed, size);
+     p.update(hue, saturation, brightness, particleSpeed, size, oneC);
      p.display(g);
     }
    }
@@ -42,6 +42,7 @@ class Particle{
  PVector acceleration;
  float sz;
  float hue = 0;
+ float hueOffset = 0;
  float saturation = 0;
  float brightness = 255;
  float speed;
@@ -53,17 +54,32 @@ class Particle{
   acceleration = new PVector(0, 0);
   sz = s;
   startFrame = frameCount;
+  float rand = random(1);
+  if(rand < 0.15){
+    hueOffset = 127;
+  }
+  else if(rand >= 0.15 && rand < 0.30){
+    hueOffset = -15;
+  }
+  else{
+    hueOffset = 0;
+  }
  }
  
  //applying the physics for each particle
- void update(float hu, float sat, float bri, float Sp, float siz){
+ void update(float hu, float sat, float bri, float Sp, float siz, boolean oneC){
    sz = siz;
    speed = Sp;
    velocity.normalize();
    velocity.mult(speed);
   velocity.add(acceleration);
   location.add(velocity);
-  hue = hu;
+  if(oneC){
+   hue = hu; 
+  }
+  else{
+  hue = (hu + hueOffset) % 255;
+  }
   saturation = sat;
   brightness = bri;
  }

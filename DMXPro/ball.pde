@@ -9,6 +9,7 @@ class Ball{
  float hue = 0;
  float saturation = 0;
  float brightness = 255;
+ float hueOffset;
  
  //constructor takes just the size of the ball
  Ball(float s){
@@ -16,6 +17,16 @@ class Ball{
    velocity = new PVector(random(-3, 3), random(-3,3));
    acceleration = new PVector(0,0);
    sz = s;
+   float rand = random(1.0);
+   if(rand < 0.10){
+   hueOffset = 127;
+   }
+   else if(rand >= 0.10 && rand < 0.20){
+    hueOffset = -20; 
+   }
+   else{
+    hueOffset = 0; 
+   }
  }
  
  //allows for switching whether the ball bounce or wrap around the screen
@@ -44,14 +55,19 @@ class Ball{
  }
  
  //applies physics engine to each ball
- void update(float s, float sp, float hu, float sat, float bri){
+ void update(float s, float sp, float hu, float sat, float bri, boolean oneC){
    velocity.normalize();
    velocity.mult(sp);
    velocity.add(acceleration);
    location.add(velocity);
    acceleration.mult(0);
    sz = s;
-   hue = hu;
+   if(oneC){
+    hue = hu; 
+   }
+   else{
+   hue = (hu + hueOffset) % 255;
+   }
    saturation = sat;
    brightness = bri;
  }

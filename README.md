@@ -15,3 +15,6 @@ The current version of this software requires you to use the ENTTEC USBPro dmx e
 This will give you a range of functions for drawing scenes, transitioning between scenes, and interconnectivity for outside input through both MIDI and an external audio input.
 
 The future of this project is intended to be a complete theatrical show control software with an array of intellegent interactivity between different input sources such as microphones, depth sensors (Kinect and equivalent), and other sources of video.
+
+
+https://youtu.be/iH55Pm7enz0

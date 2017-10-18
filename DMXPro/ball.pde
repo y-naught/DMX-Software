@@ -56,6 +56,10 @@ class Ball{
  
  //applies physics engine to each ball
  void update(float s, float sp, float hu, float sat, float bri, boolean oneC){
+   if(sp != 0 && velocity.x == 0 && velocity.y == 0){
+     PVector r = new PVector(random(-1,1), random(-1,1));
+     velocity.add(r);
+   }
    velocity.normalize();
    velocity.mult(sp);
    velocity.add(acceleration);

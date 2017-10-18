@@ -15,7 +15,7 @@ class Shower{
  
  //calling this method in draw will run the particle shower
  //must have a graphic to apply the effect to as an argument of the method
- void run(PGraphics g, float hue, float saturation, float brightness, float particleSpeed, float nppf, float size, boolean oneC){
+ void run(PGraphics g, float hue, float saturation, float brightness,float alpha, float particleSpeed, float nppf, float size, boolean oneC){
    
    //adds particles every frame
    for(int i = 0; i < nppf; i++){
@@ -28,7 +28,7 @@ class Shower{
     if(p.isDead()){
       Particles.remove(i);
     }else{
-     p.update(hue, saturation, brightness, particleSpeed, size, oneC);
+     p.update(hue, saturation, brightness, alpha, particleSpeed, size, oneC);
      p.display(g);
     }
    }
@@ -46,6 +46,7 @@ class Particle{
  float hueOffset = 0;
  float saturation = 0;
  float brightness = 255;
+ float alpha;
  float speed;
  int startFrame;
  
@@ -72,9 +73,12 @@ class Particle{
  
  
  //applying the physics for each particle
- void update(float hu, float sat, float bri, float Sp, float siz, boolean oneC){
+ void update(float hu, float sat, float bri,float al, float Sp, float siz, boolean oneC){
    sz = siz;
    speed = Sp;
+   if(velocity.x + velocity.y == 0){
+     velocity.y = 1.0;
+   }
    velocity.normalize();
    velocity.mult(speed);
   velocity.add(acceleration);
@@ -89,13 +93,14 @@ class Particle{
   }
   saturation = sat;
   brightness = bri;
+  alpha = al;
  }
  
  
  //takes the graphic you want to effect and adds the particle
  void display(PGraphics g){
    g.colorMode(HSB);
-   g.fill(hue, saturation, brightness);
+   g.fill(hue, saturation, brightness, alpha);
    g.noStroke();
    g.ellipse(location.x, location.y, sz, sz);
  }

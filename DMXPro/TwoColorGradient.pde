@@ -18,6 +18,9 @@ class TwoColorGradient{
     hue = (hu + hueOffset) % 255;;
     saturation = sat;
     gradWidth = wi;
+    if(gradSp != 0 && velocity.x == 0){
+     velocity.x = 1; 
+    }
     velocity.normalize();
     velocity.mult(gradSp);
     location.add(velocity);

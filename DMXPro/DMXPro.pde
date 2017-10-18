@@ -8,6 +8,7 @@ MidiBus bus;
 float currentAngle = 0.10;
 float radius = 200.0;
 float lightSpacing = 0.37;
+float hueOffset = 127;
 
 
 //contains all ofthe 3 channel light fixture information
@@ -39,6 +40,7 @@ boolean oneColor = true;
 int hue = 0;
 int saturation = 255;
 int brightness = 255;
+float alpha = 255;
 
 
 
@@ -65,12 +67,15 @@ RadialGradient radGrad;
 
 LinearGradient linGrad;
 float linGradOffset = 10;
+float linGradSpeed = 1;
 
 PNoise noise;
 float noiseMX = 0;
 float noiseMY = 0;
 float noiseInc = 0.01;
 int noiseMode = 0;
+float contrastMin = -10;
+float contrastMax = 265;
 
 TwoColorGradient twoColGrad;
 float gradientSpeed = 1;
@@ -132,7 +137,7 @@ void setup(){
   linGrad = new LinearGradient();
   
   //initialize the 2D perlin noise effect
-  noise = new PNoise(hue, brightness, saturation, noiseMX, noiseMY, noiseInc);
+  noise = new PNoise(hue, brightness, saturation,alpha, noiseMX, noiseMY, noiseInc);
   
   twoColGrad = new TwoColorGradient();
   
@@ -192,8 +197,8 @@ void draw(){
   else if(modes.get(2)){
     PGraphics g = Layers.get(2);
     g.beginDraw();
-    g.background(0);
-    shower.run(g, hue, saturation, brightness, particleSpeed, pCount, pSize, oneColor);
+    g.background((hue + hueOffset) % 255 ,saturation, brightness);
+    shower.run(g, hue, saturation, brightness, alpha, particleSpeed, pCount, pSize, oneColor);
     g.endDraw();
     image(g,0,0);
   }
@@ -235,7 +240,7 @@ void draw(){
     PGraphics g = Layers.get(5);
     g.beginDraw();
     g.background(0);
-    linGrad.updateColor(hue, saturation, brightness, linGradOffset);
+    linGrad.updateColor(hue, saturation, brightness, linGradOffset, linGradSpeed);
     linGrad.display(g);
     g.endDraw();
     image(g,0,0);
@@ -246,8 +251,8 @@ void draw(){
   else if(modes.get(6)){
     PGraphics g = Layers.get(6);
     g.beginDraw();
-    g.background(0);
-    noise.update(g, hue, saturation, brightness, noiseMX, noiseMY, noiseInc, noiseMode);
+    g.background(hue, saturation, 255);
+    noise.update(g, hue, saturation, brightness, alpha, noiseMX, noiseMY, noiseInc, noiseMode, contrastMin, contrastMax);
     g.endDraw();
     image(g,0,0);
   }
@@ -473,7 +478,7 @@ void controllerChange(int channel, int number, int value){
     pSize = map(value, 0, 127, 0, 20);
    }
    else if(modes.get(3)){
-    rectWidth = map(value, 0, 127, 0, 200); 
+    rectWidth = map(value, 0, 127, 0, 330); 
    }
    else if(modes.get(5)){
     linGradOffset = map(value, 0, 127, 0, 255); 
@@ -490,10 +495,10 @@ void controllerChange(int channel, int number, int value){
     numBalls = int(map(value, 0, 127, 0, 100)); 
    }
    else if(modes.get(2)){
-    pCount = int(map(value, 0, 127, 0, 50)); 
+    pCount = int(map(value, 0, 127, 0, 100)); 
    }
    else if(modes.get(3)){
-    rotationSpeed = map(value, 0, 127, 150, 20); 
+    rotationSpeed = map(value, 0, 127, 150, 5); 
    }
    else if(modes.get(6)){
     noiseMY = map(value, 0, 127, -0.50, 0.50); 
@@ -507,19 +512,35 @@ void controllerChange(int channel, int number, int value){
    ballSpeed = map(value, 0, 127, 0, 50);
    }
    else if(modes.get(2)){
-    particleSpeed = map(value,0, 127, 0, 30); 
+    particleSpeed = map(value,0, 127, 0, 18); 
    }
    else if(modes.get(6)){
     noiseInc = map(value,0, 127, 0.001, 0.08);
    }
  }
  if(number == 54){
+   if(modes.get(2)){
+    hueOffset = map(value, 0 , 127, 0, 255); 
+   }
+   if(modes.get(6)){
+   contrastMin = map(value, 0, 127, 20, -180);
+   }
+   
  }
  if(number == 55){
+   if(modes.get(2)){
+     alpha = map(value, 0, 127, 0 ,255);
+   }
+   if(modes.get(6)){
+   contrastMax = map(value, 0, 127, 235, 360);
+   }
  }
  if(number == 56){
    currentAngle = map(value, 0, 127, 0, TWO_PI);
    lightReset(Lights3Ch);
+   if(modes.get(6)){
+    alpha = map(value, 0, 127, 0 ,255); 
+   }
  }
 }
 

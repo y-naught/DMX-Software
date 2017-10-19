@@ -16,6 +16,8 @@ float lastX = 0;
 float lastY = 0;
 float curX = 250;
 float curY = 250;
+float spreadX = 0;
+float spreadY = 0;
 
 int xTrimL = 50;
 int xTrimR = 50;
@@ -197,6 +199,8 @@ void draw(){
   
   float sumX = 0;
   float sumY = 0;
+  spreadX = 0;
+  spreadY = 0;
   totalPixels = 0;
   
   //a loop that iterates through all the the depth pixels and creates an image that shows up in red if the depth is within
@@ -208,6 +212,8 @@ void draw(){
        sumX += i;
        sumY += j;
        totalPixels++;
+       spreadX += abs(i - curX);
+       spreadY += abs(i - curY);
       }
      }
   }
@@ -223,6 +229,10 @@ void draw(){
    
    lastX = curX;
    lastY = curY;
+   
+   spreadX = spreadX / totalPixels;
+   spreadY = spreadY / totalPixels;
+   
    }
   if(trigger == true){
    img.updatePixels(); 
@@ -356,11 +366,12 @@ void draw(){
     }
     
     PVector direction = new PVector((width - x - width / 2),  height - y - height / 2);
+    hue = int(map(spreadX + spreadY, 0, width, 0, 255));
     
     PGraphics g = Layers.get(8);
     g.colorMode(HSB);
     g.beginDraw();
-    g.background(0);
+    g.background((hue + hueOffset) % 255, saturation, brightness);
     fountain.run(g, hue, saturation, brightness, alpha, particleSpeed, pCount, pSize, oneColor, direction.x, direction.y);
     g.endDraw();
     if(trigger != true){

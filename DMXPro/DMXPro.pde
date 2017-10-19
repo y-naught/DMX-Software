@@ -119,6 +119,10 @@ float gradW = 200;
 Fountain fountain;
 
 CirGradient cirGrad;
+float gradAngle = 0;
+float newAngle = 0;
+float gradRotSpeed = 1;
+float gradSpread = 0;
 
 void setup(){
   size(500,500,P2D);
@@ -392,7 +396,7 @@ void draw(){
     }
     
     PVector direction = new PVector((width - x - width / 2),  height - z - height / 2);
-    hue = int(map(spreadX + spreadY, 0, width, 0, 255));
+    //hue = int(map(spreadX + spreadY, 0, width, 0, 255));
     
     PGraphics g = Layers.get(8);
     g.colorMode(HSB);
@@ -404,28 +408,43 @@ void draw(){
     image(g,0,0);
     }
   }
-  
+  //spinning circular gradient
   else if(modes.get(9)){
+    color tempC1 = color(hue, saturation,brightness);
+    color tempC2 = color((hue + hueOffset % 255), saturation, brightness);
     PGraphics g = Layers.get(9);
     g.colorMode(HSB);
     g.beginDraw();
     g.background(0);
-    cirGrad.update();
-    cirGrad.display(g);
+    cirGrad.display(g, gradAngle, gradRotSpeed, tempC1, tempC2);
     g.endDraw();
+    g.pushMatrix();
+    g.translate(width / 2, height / 2);
+    g.rotate(newAngle);
     image(g,0,0);
+    g.popMatrix();
+    newAngle = (frameCount % gradRotSpeed) / gradRotSpeed * TWO_PI;
   }
+  
+  //sound active
   else if(modes.get(10)){
+    float ang = 0;
     PGraphics g = Layers.get(10);
     fft.analyze(spectrum);
     g.colorMode(HSB);
     g.beginDraw();
     g.background(0);
+    g.ellipseMode(CENTER);
+    g.noStroke();
     for(int i = 0; i < bands; i++){
+      ang += 0.05;
       float s = map(spectrum[i], 0, 0.0001, 0, 10);
-      if(s > 40){
+      if(s > 20){
+      g.pushMatrix();
+      g.translate(width / 2, height / 2);
       g.fill(map(i, 0, bands, 0, 255), saturation, brightness);
-      g.ellipse(random(0, width), random(0, height), s,s);
+      g.ellipse(200 * sin(ang), 200 * cos(ang), s,s);
+      g.popMatrix();
       }else{
        s = 0; 
        g.fill(255);
@@ -730,7 +749,9 @@ void controllerChange(int channel, int number, int value){
    if(modes.get(6)){
    contrastMin = map(value, 0, 127, 20, -180);
    }
-   
+   if(modes.get(9)){
+    gradRotSpeed = map(value, 0 , 127, 900, 10); 
+   }
  }
  if(number == 55){
    if(modes.get(2)){
@@ -738,6 +759,9 @@ void controllerChange(int channel, int number, int value){
    }
    if(modes.get(6)){
    contrastMax = map(value, 0, 127, 235, 360);
+   }
+   if(modes.get(9)){
+    gradAngle = map(value, 0 , 127, 0, 0.025); 
    }
  }
  if(number == 56){

@@ -4,6 +4,13 @@ import themidibus.*;
 import KinectPV2.KJoint;
 import KinectPV2.*;
 import java.util.*;
+import processing.sound.*;
+
+AudioDevice audioDevice;
+AudioIn audioIn;
+FFT fft;
+int bands = 128;
+float [] spectrum = new float[bands];
 
 //decalre the handler for the midi controller
 MidiBus bus;
@@ -18,6 +25,8 @@ float curX = 250;
 float curY = 250;
 float spreadX = 0;
 float spreadY = 0;
+float curZ = 0;
+float lastZ = 0;
 
 int xTrimL = 50;
 int xTrimR = 50;
@@ -42,7 +51,7 @@ ArrayList<ThreeCh> Lights3Ch;
 int numLights = 17;
 
 //set the number of pre-created effects here and create a switch for each effect
-int numEffects = 9;
+int numEffects = 11;
 ArrayList<Boolean> modes;
 
 
@@ -109,12 +118,20 @@ float gradW = 200;
 
 Fountain fountain;
 
+CirGradient cirGrad;
+
 void setup(){
   size(500,500,P2D);
   rectMode(CENTER);
   colorMode(HSB);
   frameRate(30);
   
+  audioIn = new AudioIn(this, 0);
+  audioIn.start();
+  
+  fft = new FFT(this, bands);
+  
+  fft.input(audioIn);
   
   bus = new MidiBus(this, 0, -1);
   
@@ -175,6 +192,7 @@ void setup(){
   twoColGrad = new TwoColorGradient();
   
   fountain = new Fountain();
+  cirGrad = new CirGradient();
   
   //start the program with the first effect on
   for(int i = 0; i < modes.size(); i++){
@@ -199,6 +217,7 @@ void draw(){
   
   float sumX = 0;
   float sumY = 0;
+  float sumZ = 0;
   spreadX = 0;
   spreadY = 0;
   totalPixels = 0;
@@ -211,6 +230,7 @@ void draw(){
        img.pixels[i + j*kinect.WIDTHDepth] = color(0, 255, 255);
        sumX += i;
        sumY += j;
+       sumZ += rawData[i + j *kinect.WIDTHDepth];
        totalPixels++;
        spreadX += abs(i - curX);
        spreadY += abs(i - curY);
@@ -223,12 +243,15 @@ void draw(){
   if(totalPixels > 150){
    float x = sumX / totalPixels; 
    float y = sumY / totalPixels;
+   float z = sumZ / totalPixels;
    
    curX = map(x, 0, kinect.WIDTHDepth, 0, width);
    curY = map(y, 0, kinect.HEIGHTDepth, 0, height);
+   curZ = map(z, 50, 3000, 0, height);
    
    lastX = curX;
    lastY = curY;
+   lastZ = curZ;
    
    spreadX = spreadX / totalPixels;
    spreadY = spreadY / totalPixels;
@@ -357,15 +380,18 @@ void draw(){
   else if(modes.get(8)){
     float x;
     float y;
+    float z;
     if(totalPixels > 150){
       x = curX;
       y = curY;
+      z = curZ;
     }else{
       x = lastX;
       y = lastY;
+      z = lastZ;
     }
     
-    PVector direction = new PVector((width - x - width / 2),  height - y - height / 2);
+    PVector direction = new PVector((width - x - width / 2),  height - z - height / 2);
     hue = int(map(spreadX + spreadY, 0, width, 0, 255));
     
     PGraphics g = Layers.get(8);
@@ -377,6 +403,37 @@ void draw(){
     if(trigger != true){
     image(g,0,0);
     }
+  }
+  
+  else if(modes.get(9)){
+    PGraphics g = Layers.get(9);
+    g.colorMode(HSB);
+    g.beginDraw();
+    g.background(0);
+    cirGrad.update();
+    cirGrad.display(g);
+    g.endDraw();
+    image(g,0,0);
+  }
+  else if(modes.get(10)){
+    PGraphics g = Layers.get(10);
+    fft.analyze(spectrum);
+    g.colorMode(HSB);
+    g.beginDraw();
+    g.background(0);
+    for(int i = 0; i < bands; i++){
+      float s = map(spectrum[i], 0, 0.0001, 0, 10);
+      if(s > 40){
+      g.fill(map(i, 0, bands, 0, 255), saturation, brightness);
+      g.ellipse(random(0, width), random(0, height), s,s);
+      }else{
+       s = 0; 
+       g.fill(255);
+      g.ellipse(random(0, width), random(0, height), s,s);
+      }
+    }
+    g.endDraw();
+    image(g,0,0);
   }
   
   
@@ -532,6 +589,32 @@ void keyPressed(){
  if(key == '8'){
    for(int i = 0; i < modes.size(); i++){
    if(i == 7){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
+ if(key == '9'){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 8){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
+ if(key == '0'){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 9){
     Boolean m = modes.get(i);
     m = true; 
     modes.set(i, m);
@@ -788,6 +871,32 @@ void noteOn(Note note){
    }
   }
  }
+ if(note.pitch() == 49){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 9){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
+ if(note.pitch() == 50){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 10){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
  if(note.pitch() == 98){
     if(oneColor == true){
    oneColor = false; 
@@ -811,4 +920,4 @@ void noteOn(Note note){
     noiseMode = 2; 
    }
  }
-  }
+}

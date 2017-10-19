@@ -17,6 +17,7 @@ class Shower{
  //calling this method in draw will run the particle shower
  //must have a graphic to apply the effect to as an argument of the method
  void run(PGraphics g, float hue, float saturation, float brightness,float alpha, float particleSpeed, float nppf, float size, boolean oneC){
+   PVector dir = new PVector(0, 1);
    
    //adds particles every frame
    for(int i = 0; i < nppf; i++){
@@ -30,6 +31,7 @@ class Shower{
     if(p.isDead()){
       Particles.remove(i);
     }else{
+     p.direction(dir);
      p.update(hue, saturation, brightness, alpha, particleSpeed, size, oneC);
      p.display(g);
     }

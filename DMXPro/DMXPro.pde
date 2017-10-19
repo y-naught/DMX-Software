@@ -1,10 +1,34 @@
 import processing.serial.*;
 import dmxP512.*;
 import themidibus.*;
+import KinectPV2.KJoint;
+import KinectPV2.*;
+import java.util.*;
 
 //decalre the handler for the midi controller
 MidiBus bus;
 
+//kinect variables
+KinectPV2 kinect;
+boolean trigger = true;
+PImage img;
+float lastX = 0;
+float lastY = 0;
+float curX = 250;
+float curY = 250;
+
+int xTrimL = 50;
+int xTrimR = 50;
+int yTrimT = 100;
+int yTrimB = 100;
+
+float zoom = 200;
+int maxD = 3300; // 4.5mx
+int minD = 00;  //  0cm
+float totalPixels;
+
+
+//light spacing variables
 float currentAngle = 0.10;
 float radius = 200.0;
 float lightSpacing = 0.37;
@@ -16,7 +40,7 @@ ArrayList<ThreeCh> Lights3Ch;
 int numLights = 17;
 
 //set the number of pre-created effects here and create a switch for each effect
-int numEffects = 8;
+int numEffects = 9;
 ArrayList<Boolean> modes;
 
 
@@ -55,7 +79,7 @@ Shower shower;
 float pSize = 5;
 //number of particles generated per frame in draw if switched on
 int pCount = 20;
-float particleSpeed = 5;
+float particleSpeed = 10;
 
 //rotating rectangle at the center of the screen
 float rectWidth = 20;
@@ -81,6 +105,7 @@ TwoColorGradient twoColGrad;
 float gradientSpeed = 1;
 float gradW = 200;
 
+Fountain fountain;
 
 void setup(){
   size(500,500,P2D);
@@ -90,6 +115,12 @@ void setup(){
   
   
   bus = new MidiBus(this, 0, -1);
+  
+  kinect = new KinectPV2(this);
+  kinect.enableDepthImg(true);
+  //Enable point cloud
+  kinect.enablePointCloud(true);
+  kinect.init();
   
   //DMX setup procedure
   dmxOutput = new DmxP512(this, universeSize, false);
@@ -141,6 +172,8 @@ void setup(){
   
   twoColGrad = new TwoColorGradient();
   
+  fountain = new Fountain();
+  
   //start the program with the first effect on
   for(int i = 0; i < modes.size(); i++){
     if(i == 0){
@@ -155,7 +188,47 @@ void setup(){
 
 
 void draw(){
+  if(modes.get(8)){
+  int [] rawData = kinect.getRawDepthData();
+  img = createImage(kinect.WIDTHDepth, kinect.HEIGHTDepth, RGB);
   
+  img.loadPixels();
+  
+  
+  float sumX = 0;
+  float sumY = 0;
+  totalPixels = 0;
+  
+  //a loop that iterates through all the the depth pixels and creates an image that shows up in red if the depth is within
+  //the minimum and maximum thresholds currently set (see key pressed for adjustments)
+  for(int i = xTrimL; i < kinect.WIDTHDepth - xTrimR; i++){
+   for(int j = yTrimT; j < kinect.HEIGHTDepth - yTrimB; j++){
+      if(rawData[i + j*kinect.WIDTHDepth] > minD && rawData[i + j*kinect.WIDTHDepth] < maxD){
+       img.pixels[i + j*kinect.WIDTHDepth] = color(0, 255, 255);
+       sumX += i;
+       sumY += j;
+       totalPixels++;
+      }
+     }
+  }
+  
+  
+  
+  if(totalPixels > 150){
+   float x = sumX / totalPixels; 
+   float y = sumY / totalPixels;
+   
+   curX = map(x, 0, kinect.WIDTHDepth, 0, width);
+   curY = map(y, 0, kinect.HEIGHTDepth, 0, height);
+   
+   lastX = curX;
+   lastY = curY;
+   }
+  if(trigger == true){
+   img.updatePixels(); 
+   image(img, 0, 0);
+   }
+  }
   //Solid Color in the window
   if(modes.get(0)){
   PGraphics g = Layers.get(0);
@@ -197,7 +270,8 @@ void draw(){
   else if(modes.get(2)){
     PGraphics g = Layers.get(2);
     g.beginDraw();
-    g.background((hue + hueOffset) % 255 ,saturation, brightness);
+    g.background(0);
+    //g.background((hue + hueOffset) % 255 ,saturation, brightness);
     shower.run(g, hue, saturation, brightness, alpha, particleSpeed, pCount, pSize, oneColor);
     g.endDraw();
     image(g,0,0);
@@ -257,6 +331,7 @@ void draw(){
     image(g,0,0);
   }
   
+  //moving bar x-direction
   else if(modes.get(7)){
     PGraphics g = Layers.get(7);
     g.colorMode(HSB);
@@ -266,6 +341,31 @@ void draw(){
     twoColGrad.display(g, gradientSpeed, hue, saturation, brightness, gradW);
     g.endDraw();
     image(g,0,0);
+  }
+  
+  //Kinect Particle Fountain
+  else if(modes.get(8)){
+    float x;
+    float y;
+    if(totalPixels > 150){
+      x = curX;
+      y = curY;
+    }else{
+      x = lastX;
+      y = lastY;
+    }
+    
+    PVector direction = new PVector((width - x - width / 2),  height - y - height / 2);
+    
+    PGraphics g = Layers.get(8);
+    g.colorMode(HSB);
+    g.beginDraw();
+    g.background(0);
+    fountain.run(g, hue, saturation, brightness, alpha, particleSpeed, pCount, pSize, oneColor, direction.x, direction.y);
+    g.endDraw();
+    if(trigger != true){
+    image(g,0,0);
+    }
   }
   
   
@@ -454,6 +554,17 @@ void keyPressed(){
     noiseMode = 2; 
    }
  }
+ if(key == 'i'){
+   if(trigger == true){
+    trigger = false; 
+   }else{
+    trigger = true;
+   }
+ }
+ if(key == 'p'){
+  println(lastX);
+  println(lastY);
+ }
 }
 
 
@@ -474,7 +585,7 @@ void controllerChange(int channel, int number, int value){
    if(modes.get(1)){
      ballSize = map(value, 0, 127, 0, 50);
    }
-   else if(modes.get(2)){
+   else if(modes.get(2) || modes.get(8)){
     pSize = map(value, 0, 127, 0, 20);
    }
    else if(modes.get(3)){
@@ -494,7 +605,7 @@ void controllerChange(int channel, int number, int value){
    if(modes.get(1)){
     numBalls = int(map(value, 0, 127, 0, 100)); 
    }
-   else if(modes.get(2)){
+   else if(modes.get(2) || modes.get(8)){
     pCount = int(map(value, 0, 127, 0, 100)); 
    }
    else if(modes.get(3)){
@@ -511,7 +622,7 @@ void controllerChange(int channel, int number, int value){
    if(modes.get(1)){
    ballSpeed = map(value, 0, 127, 0, 50);
    }
-   else if(modes.get(2)){
+   else if(modes.get(2) || modes.get(8)){
     particleSpeed = map(value,0, 127, 0, 18); 
    }
    else if(modes.get(6)){
@@ -643,6 +754,19 @@ void noteOn(Note note){
   if(note.pitch() == 63){
     for(int i = 0; i < modes.size(); i++){
    if(i == 7){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
+ if(note.pitch() == 48){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 8){
     Boolean m = modes.get(i);
     m = true; 
     modes.set(i, m);

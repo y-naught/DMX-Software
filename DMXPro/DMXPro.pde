@@ -11,6 +11,8 @@ AudioIn audioIn;
 FFT fft;
 int bands = 128;
 float [] spectrum = new float[bands];
+float [] audioSmooth = new float[bands];
+float audioSmFact = 0.2;
 
 //decalre the handler for the midi controller
 MidiBus bus;
@@ -77,6 +79,10 @@ int saturation = 255;
 int brightness = 255;
 float alpha = 255;
 
+int hue2 = 127;
+int saturation2 = 255;
+int brightness2 = 255;
+
 
 
 //Initialize the array for Boucing Balls effect with variables for 
@@ -124,6 +130,8 @@ float newAngle = 0;
 float gradRotSpeed = 1;
 float gradSpread = 0;
 
+
+
 void setup(){
   size(500,500,P2D);
   rectMode(CENTER);
@@ -162,9 +170,6 @@ void setup(){
   
   //create an array list for each type of light
   Lights3Ch = new ArrayList<ThreeCh>();
-  
-  
-  // setup for distributing the light fixtures into to the window about a circle
   
   
   //add your lights
@@ -207,6 +212,8 @@ void setup(){
     }
   }
 }
+
+
 
 
 
@@ -259,8 +266,8 @@ void draw(){
    
    spreadX = spreadX / totalPixels;
    spreadY = spreadY / totalPixels;
-   
    }
+   
   if(trigger == true){
    img.updatePixels(); 
    image(img, 0, 0);
@@ -313,6 +320,8 @@ void draw(){
     g.endDraw();
     image(g,0,0);
   }
+  
+  
   
   
   //rotating rectangle
@@ -395,7 +404,7 @@ void draw(){
       z = lastZ;
     }
     
-    PVector direction = new PVector((width - x - width / 2),  height - z - height / 2);
+    PVector direction = new PVector((width - x - width / 2),  height - y - height / 2);
     //hue = int(map(spreadX + spreadY, 0, width, 0, 255));
     
     PGraphics g = Layers.get(8);
@@ -431,24 +440,22 @@ void draw(){
     float ang = 0;
     PGraphics g = Layers.get(10);
     fft.analyze(spectrum);
+    
     g.colorMode(HSB);
     g.beginDraw();
     g.background(0);
     g.ellipseMode(CENTER);
     g.noStroke();
     for(int i = 0; i < bands; i++){
-      ang += 0.05;
-      float s = map(spectrum[i], 0, 0.0001, 0, 10);
-      if(s > 20){
+      audioSmooth[i] += ((spectrum[i] - audioSmooth[i]) * audioSmFact);
+      ang = random(0, TWO_PI);
+      float s = map(audioSmooth[i], 0, 0.0001, 0, 20);
+      if(s > 30){
       g.pushMatrix();
       g.translate(width / 2, height / 2);
       g.fill(map(i, 0, bands, 0, 255), saturation, brightness);
       g.ellipse(200 * sin(ang), 200 * cos(ang), s,s);
       g.popMatrix();
-      }else{
-       s = 0; 
-       g.fill(255);
-      g.ellipse(random(0, width), random(0, height), s,s);
       }
     }
     g.endDraw();

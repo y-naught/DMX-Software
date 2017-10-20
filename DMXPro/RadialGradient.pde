@@ -6,6 +6,7 @@ class RadialGradient{
  float smoothness;
  float speed;
  float radius = 1;
+ 
  RadialGradient(float sm, float sp){
   hue = 0;
   saturation = 200;

@@ -53,7 +53,7 @@ ArrayList<ThreeCh> Lights3Ch;
 int numLights = 17;
 
 //set the number of pre-created effects here and create a switch for each effect
-int numEffects = 11;
+int numEffects = 12;
 ArrayList<Boolean> modes;
 
 
@@ -130,7 +130,7 @@ float newAngle = 0;
 float gradRotSpeed = 1;
 float gradSpread = 0;
 
-
+TwoCirGrad twoCirGrad;
 
 void setup(){
   size(500,500,P2D);
@@ -199,9 +199,9 @@ void setup(){
   noise = new PNoise(hue, brightness, saturation,alpha, noiseMX, noiseMY, noiseInc);
   
   twoColGrad = new TwoColorGradient();
-  
   fountain = new Fountain();
   cirGrad = new CirGradient();
+  twoCirGrad = new TwoCirGrad();
   
   //start the program with the first effect on
   for(int i = 0; i < modes.size(); i++){
@@ -419,8 +419,8 @@ void draw(){
   }
   //spinning circular gradient
   else if(modes.get(9)){
-    color tempC1 = color(hue, saturation,brightness);
-    color tempC2 = color((hue + hueOffset % 255), saturation, brightness);
+    color tempC1 = color(hue, saturation,brightness, 255);
+    color tempC2 = color((hue + hueOffset % 255), saturation, 0, 0);
     PGraphics g = Layers.get(9);
     g.colorMode(HSB);
     g.beginDraw();
@@ -462,7 +462,20 @@ void draw(){
     image(g,0,0);
   }
   
-  
+  if(modes.get(11)){
+  PGraphics g = Layers.get(11);
+   color temp1 = color(hue,saturation,brightness, 0);
+   color temp2 = color(hue + 40, saturation, brightness, 255);
+   color temp3 = color(0,0,0,0);
+   
+    g.colorMode(HSB);
+    g.beginDraw();
+    g.background(0);
+    twoCirGrad.update(g, 2000, 0.005, temp1, temp2, temp3);
+    g.endDraw();
+    image(g,0,0);
+    
+  }
   
   //this uses the move lights function of you press the mouse over any of the lights
   if(mousePressed == true){
@@ -918,6 +931,19 @@ void noteOn(Note note){
  if(note.pitch() == 50){
    for(int i = 0; i < modes.size(); i++){
    if(i == 10){
+    Boolean m = modes.get(i);
+    m = true; 
+    modes.set(i, m);
+   }else{
+    Boolean m = modes.get(i);
+    m = false; 
+    modes.set(i, m);
+   }
+  }
+ }
+ if(note.pitch() == 51){
+   for(int i = 0; i < modes.size(); i++){
+   if(i == 11){
     Boolean m = modes.get(i);
     m = true; 
     modes.set(i, m);

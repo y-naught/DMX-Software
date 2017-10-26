@@ -13,7 +13,7 @@ class TwoColorGradient{
    velocity = new PVector(1,0);
   }
   
-  void display(PGraphics g, float gradSp,float hu,float sat,float bri, float wi){
+  void display(PGraphics g, float gradSp,float hu,float sat,float bri, float wi, int hu2, int sat2, int bri2){
     brightness = bri;
     hue = (hu + hueOffset) % 255;;
     saturation = sat;
@@ -27,7 +27,7 @@ class TwoColorGradient{
     g.colorMode(HSB);
     g.rectMode(CENTER);
     g.noStroke();
-    g.fill(hue, saturation, brightness);
+    g.fill(hu2, sat2, bri2);
     g.rect(location.x, location.y, gradWidth, 1000);
   }
   

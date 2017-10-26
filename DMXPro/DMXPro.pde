@@ -16,7 +16,7 @@ float audioSmFact = 0.2;
 
 //decalre the handler for the midi controller
 MidiBus bus;
-
+boolean colSwitch = true;
 //kinect variables
 KinectPV2 kinect;
 boolean trigger = true;
@@ -82,6 +82,7 @@ float alpha = 255;
 int hue2 = 127;
 int saturation2 = 255;
 int brightness2 = 255;
+int alpha2 = 255;
 
 
 
@@ -384,7 +385,7 @@ void draw(){
     g.beginDraw();
     g.background(hue, saturation, brightness);
     twoColGrad.checkEdges();
-    twoColGrad.display(g, gradientSpeed, hue, saturation, brightness, gradW);
+    twoColGrad.display(g, gradientSpeed, hue, saturation, brightness, gradW, hue2, saturation2, brightness2);
     g.endDraw();
     image(g,0,0);
   }
@@ -474,7 +475,6 @@ void draw(){
     twoCirGrad.update(g, 2000, 0.005, temp1, temp2, temp3);
     g.endDraw();
     image(g,0,0);
-    
   }
   
   //this uses the move lights function of you press the mouse over any of the lights
@@ -706,13 +706,25 @@ void keyPressed(){
 //the sliders on the midi controller
 void controllerChange(int channel, int number, int value){
  if(number == 48){
+   if(colSwitch == true){
    hue = value * 2;
+   }else{
+    hue2 = value * 2; 
+   }
  }
  if(number == 49){
+   if(colSwitch == true){
    saturation = value * 2;
+   }else{
+    saturation2 = value * 2; 
+   }
  }
  if(number == 50){
+   if(colSwitch == true){
    brightness = value * 2;
+   }else{
+    brightness2 = value * 2; 
+   }
  }
  if(number == 51){
    if(modes.get(1)){
@@ -976,5 +988,21 @@ void noteOn(Note note){
    if(noiseMode != 2){
     noiseMode = 2; 
    }
+ }
+ if(note.pitch() == 89){
+   if(colSwitch == true){
+    colSwitch = false;
+   }
+   else{
+    colSwitch = true; 
+   }
+ }
+ if(note.pitch() == 70){
+  if(colSwitch == true){
+   
+   println("Background: " + hex(color(hue, saturation, brightness)));  
+  }else{
+   println("Secondary: " + hex(color(hue2, saturation2, brightness2)));  
+  }
  }
 }

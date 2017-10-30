@@ -343,14 +343,12 @@ void draw(){
   }
   
   
-  //radial gradient flow
+  //effect needs filled
   else if(modes.get(4)){
     PGraphics g = Layers.get(4);
-    //g.colorMode(HSB, 255, 255, 255);
-    //g.ellipseMode(RADIUS);
     g.beginDraw();
     g.background(0);
-    radGrad.display(g);
+    
     g.endDraw();
     image(g,0,0);
   }
@@ -999,7 +997,6 @@ void noteOn(Note note){
  }
  if(note.pitch() == 70){
   if(colSwitch == true){
-   
    println("Background: " + hex(color(hue, saturation, brightness)));  
   }else{
    println("Secondary: " + hex(color(hue2, saturation2, brightness2)));  

@@ -44,13 +44,15 @@ float totalPixels;
 //light spacing variables
 float currentAngle = 0.10;
 float radius = 200.0;
-float lightSpacing = 0.37;
+float lightSpacing = 0.33;
 float hueOffset = 127;
 
 
 //contains all ofthe 3 channel light fixture information
 ArrayList<ThreeCh> Lights3Ch;
-int numLights = 17;
+int numLights = 19;
+Boolean[] OnOff = new Boolean[numLights];
+Boolean lightBlack = false;
 
 //set the number of pre-created effects here and create a switch for each effect
 int numEffects = 12;
@@ -100,8 +102,9 @@ int pCount = 20;
 float particleSpeed = 10;
 
 //rotating rectangle at the center of the screen
+float rectAngle = 0;
 float rectWidth = 20;
-float rotationSpeed = 100; 
+float rotationSpeed = 0; 
 //inverse of what you think
 
 //radial gradient function
@@ -178,6 +181,7 @@ void setup(){
     PVector nextLoc = new PVector(radius * sin(currentAngle) + width / 2,radius * cos(currentAngle) + height / 2);
     Lights3Ch.add(new ThreeCh(i*3,nextLoc));
     currentAngle += (lightSpacing);
+    OnOff[i] = false;
   }
 
   
@@ -328,15 +332,25 @@ void draw(){
   //rotating rectangle
   else if(modes.get(3)){
     PGraphics g = Layers.get(3);
+    rectAngle += rotationSpeed;
+    float cx = (width / 2) * sin(rectAngle);
+    float cy = (width / 2) * cos(-rectAngle);
     g.colorMode(HSB);
     g.rectMode(CENTER);
     g.beginDraw();
     g.background(0);
-    g.pushMatrix();
     g.translate(width / 2, height / 2);
-    g.rotate(TWO_PI * (frameCount % rotationSpeed / 2) / rotationSpeed);
+    g.pushMatrix();
+    g.rotate(rectAngle);
     g.fill(hue, saturation, brightness);
-    g.rect(0, 0, rectWidth, width * 1.5);
+    g.rect(cx, cy, rectWidth, width);
+    g.popMatrix();
+    g.pushMatrix();
+    g.rectMode(CORNER);
+    g.rotate(rectAngle);
+    g.fill(hue2, brightness2, saturation2);
+    g.rectMode(CENTER);
+    g.rect(-cx,-cy,rectWidth, width);
     g.popMatrix();
     g.endDraw();
     image(g,0,0);
@@ -477,7 +491,7 @@ void draw(){
   
   //this uses the move lights function of you press the mouse over any of the lights
   if(mousePressed == true){
-   lightArranger(Lights3Ch); 
+     lightArranger(Lights3Ch); 
   }
   
   
@@ -492,6 +506,7 @@ void draw(){
   for(int i = 1; i < Lights3Ch.size() * 3; i++){
     colorMode(HSB);
     ThreeCh l = Lights3Ch.get(i / 3);
+    if(!l.black){
     color c = l.sampleColor(g);
     dmxOutput.set(i, int(red(c)));
     i++;
@@ -501,9 +516,21 @@ void draw(){
     noStroke();
     fill(c);
     l.display();
+   }else{
+    color c = l.sampleColor(g);
+    dmxOutput.set(i, 0);
+    i++;
+    dmxOutput.set(i, 0);
+    i++;
+    dmxOutput.set(i, 0);
+    noStroke();
+    fill(c);
+    l.display();
    }
   }
+  }
  }
+ lightBlack = false;
 }
 
 
@@ -516,6 +543,19 @@ void lightArranger(ArrayList<ThreeCh> lights){
       l.move(mouseX, mouseY);
     }
   }
+}
+
+void lightBlackout(ArrayList<ThreeCh> lights){
+ for(int i = 0; i < lights.size(); i++){
+  ThreeCh l = lights.get(i);
+    if(mouseX > l.location.x - l.sz / 2 && mouseX < l.location.x + l.sz / 2 && mouseY > l.location.y - l.sz / 2 && mouseY- l.sz / 2 < l.location.y + l.sz / 2){
+      if(l.black == true){
+       l.black = false; 
+      }else{
+       l.black = true; 
+      }
+    }
+ }
 }
 
 void lightReset(ArrayList<ThreeCh> lights){
@@ -696,6 +736,9 @@ void keyPressed(){
   println(lastX);
   println(lastY);
  }
+ if(key == 'z'){
+   lightBlackout(Lights3Ch); 
+ }
 }
 
 
@@ -752,7 +795,7 @@ void controllerChange(int channel, int number, int value){
     pCount = int(map(value, 0, 127, 0, 100)); 
    }
    else if(modes.get(3)){
-    rotationSpeed = map(value, 0, 127, 150, 5); 
+    rotationSpeed = map(value, 0, 127, 0, PI / 12); 
    }
    else if(modes.get(6)){
     noiseMY = map(value, 0, 127, -0.50, 0.50); 

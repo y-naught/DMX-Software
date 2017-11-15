@@ -6,13 +6,15 @@ import KinectPV2.*;
 import java.util.*;
 import processing.sound.*;
 
+PrintWriter output;  
+
 AudioDevice audioDevice;
 AudioIn audioIn;
 FFT fft;
-int bands = 128;
+int bands = 64;
 float [] spectrum = new float[bands];
 float [] audioSmooth = new float[bands];
-float audioSmFact = 0.2;
+float audioSmFact = 0.1;
 
 //decalre the handler for the midi controller
 MidiBus bus;
@@ -216,6 +218,8 @@ void setup(){
      modes.set(i, false);
     }
   }
+  
+  
 }
 
 
@@ -303,7 +307,7 @@ void draw(){
     
     PGraphics g = Layers.get(1);
     g.beginDraw();
-    g.background(0);
+    g.background(hue2, saturation2, brightness2);
     for(int i = 0; i < balls.size(); i++){
       Ball b = balls.get(i);
       b.checkEdges();
@@ -334,23 +338,24 @@ void draw(){
     PGraphics g = Layers.get(3);
     rectAngle += rotationSpeed;
     float cx = (width / 2) * sin(rectAngle);
-    float cy = (width / 2) * cos(-rectAngle);
+    float cy = (width / 2) * cos(rectAngle);
     g.colorMode(HSB);
-    g.rectMode(CENTER);
+    g.rectMode(CORNER);
     g.beginDraw();
     g.background(0);
-    g.translate(width / 2, height / 2);
     g.pushMatrix();
+    g.translate(width / 2, height / 2);
     g.rotate(rectAngle);
     g.fill(hue, saturation, brightness);
-    g.rect(cx, cy, rectWidth, width);
+    //g.translate(cx,cy);
+    g.rect(0, 0, rectWidth, width/2);
     g.popMatrix();
     g.pushMatrix();
-    g.rectMode(CORNER);
-    g.rotate(rectAngle);
+    g.translate(width / 2, height / 2);
+    g.rotate(rectAngle+PI);
     g.fill(hue2, brightness2, saturation2);
-    g.rectMode(CENTER);
-    g.rect(-cx,-cy,rectWidth, width);
+    //g.translate(cx,-cy);
+    g.rect(0,0,rectWidth, width/2);
     g.popMatrix();
     g.endDraw();
     image(g,0,0);
@@ -461,8 +466,8 @@ void draw(){
     g.noStroke();
     for(int i = 0; i < bands; i++){
       audioSmooth[i] += ((spectrum[i] - audioSmooth[i]) * audioSmFact);
-      ang = random(0, TWO_PI);
-      float s = map(audioSmooth[i], 0, 0.0001, 0, 20);
+      ang = map(i, 0, bands, 0, TWO_PI);
+      float s = map(audioSmooth[i], 0, 0.01, 0, 20);
       if(s > 30){
       g.pushMatrix();
       g.translate(width / 2, height / 2);
@@ -738,6 +743,21 @@ void keyPressed(){
  }
  if(key == 'z'){
    lightBlackout(Lights3Ch); 
+ }
+ if(key == 'l'){
+   readLightFile("positions.txt");
+ }
+ if(key == 'k'){
+   readLightFile("positions2.txt");
+ }
+ if(key == 'j'){
+   readLightFile("positions3.txt");
+ }
+ if(key == 'h'){
+   readLightFile("positions4.txt");
+ }
+ if(key == 's'){
+   saveLightPreset();
  }
 }
 
@@ -1045,4 +1065,25 @@ void noteOn(Note note){
    println("Secondary: " + hex(color(hue2, saturation2, brightness2)));  
   }
  }
+}
+
+void readLightFile(String s){
+ String[] positions = loadStrings(s);
+ for(int i = 0; i < numLights; i++){
+   ThreeCh l = Lights3Ch.get(i);
+   l.move(float(positions[i*3]),float(positions[i*3+1]));
+   l.black = boolean(positions[i*3+2]);
+ }
+}
+
+void saveLightPreset(){
+  output = createWriter("positions5.txt");
+  for(int i = 0; i < numLights; i++){
+    ThreeCh l = Lights3Ch.get(i);
+    output.println(l.location.x);
+    output.println(l.location.y);
+    output.println(l.black);
+  }
+  output.flush();
+  output.close();
 }
